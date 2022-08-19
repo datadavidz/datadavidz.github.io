@@ -3,14 +3,17 @@ project:
   output-dir: docs
 
 website:
-  title: "blog"
+  title: "[datadavidz]"
+  site-url: https://datadavidz.github.io
+  description: "Personal blog"
   navbar:
     right:
-      - about.qmd
+      - text: Blog
+        href: blog.qmd
       - icon: github
-        href: https://github.com/
+        href: https://github.com/datadavidz
       - icon: twitter
-        href: https://twitter.com
+        href: https://twitter.com/datadavidz
 format:
   html:
     theme: cosmo
