@@ -2,6 +2,7 @@
   {
     "listing": "/archive.html",
     "items": [
+      "/posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html",
       "/posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html",
       "/posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html",
       "/posts/post-with-code/index.html",
@@ -11,6 +12,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html",
       "/posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html",
       "/posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html",
       "/posts/post-with-code/index.html",
