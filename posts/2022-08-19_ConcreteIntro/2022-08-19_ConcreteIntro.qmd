@@ -1,9 +1,7 @@
 ---
-title: "Concrete Intro"
+title: "Modeling the Strength of High Performance Concrete"
+date: "2022-08-19"
 ---
-
-## **Modeling the Strength of High Performance Concrete**
-*Posted on February 14, 2020*
 
 I have a particular interest in the ability of machine learning algorithms to predict formulations and I am always searching for these types of datasets.  One such dataset is the [Concrete Compressive Strength Dataset](http://archive.ics.uci.edu/ml/datasets/Concrete+Compressive+Strength) found on the UCI Machine Learning Repository.  Many thanks to the original owner, Prof. I-Cheng Yeh for making this dataset available to the public!
 
