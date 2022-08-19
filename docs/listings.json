@@ -6,5 +6,13 @@
       "/posts/post-with-code/index.html",
       "/posts/welcome/index.html"
     ]
+  },
+  {
+    "listing": "/archive.html",
+    "items": [
+      "/posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html",
+      "/posts/post-with-code/index.html",
+      "/posts/welcome/index.html"
+    ]
   }
 ]
