@@ -1,0 +1,46 @@
+---
+title: "Concrete Intro"
+---
+
+## **Modeling the Strength of High Performance Concrete**
+*Posted on February 14, 2020*
+
+I have a particular interest in the ability of machine learning algorithms to predict formulations and I am always searching for these types of datasets.  One such dataset is the [Concrete Compressive Strength Dataset](http://archive.ics.uci.edu/ml/datasets/Concrete+Compressive+Strength) found on the UCI Machine Learning Repository.  Many thanks to the original owner, Prof. I-Cheng Yeh for making this dataset available to the public!
+
+Conventional concrete contains cement, fine and coarse aggregates and water.  High performance concrete incorporates additional ingredients such as fly ash, blast furnace slag and chemical additives like superplasticizer.  The compressive strength of concrete has been empirically found to have an inverse relationship to the water-to-cement ratio also known as the Abrams' rule.  High performance concrete is a more complex material and experimental data does not always support this general rule.  This dataset contains over 1000 high performance concrete formulations containing the ingredients described above along with the compressive strength of each formulation.  In addition, the age of the concrete before testing is also recorded.
+
+### Basic Analysis of the Concrete Dataset
+
+The concrete dataset was downloaded from the UCI repository as an Excel file and imported into R using the readxl package without further modification.  Once the dataset was loaded into R, the column names were cleaned up into a format more amenable to data analysis.  The complete dataset contains 1030 rows of concrete formulations of which the first 5 are shown below.
+
+```{r }
+#| warning: false
+library(readxl)
+library(tidyverse)
+library(knitr)
+```
+
+```{r }
+filename <- "Concrete_Data.xls"
+
+folder <- ""
+numberCols <- 9 #total number of columns in spreadsheet
+
+colTypes <- rep("numeric", numberCols)
+concrete_tbl <- read_excel(path = paste0(folder, filename), col_types = colTypes)
+
+concrete_tbl <- concrete_tbl %>%
+  rename(cement = starts_with("Cement")) %>%
+  rename(blast_furnace_slag = starts_with("Blast")) %>%
+  rename(fly_ash = starts_with("Fly Ash")) %>%
+  rename(water = starts_with("Water")) %>%
+  rename(superplasticizer = starts_with("Super")) %>%
+  rename(coarse_aggregate = starts_with("Coarse")) %>%
+  rename(fine_aggregate = starts_with("Fine")) %>%
+  rename(age = starts_with("Age")) %>%
+  rename(compressive_strength = starts_with("Concrete"))
+```
+
+```{r }
+knitr::kable(head(concrete_tbl, 5), caption = "First 5 Rows of Concrete Dataset")
+```
