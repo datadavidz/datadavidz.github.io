@@ -2,26 +2,30 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://datadavidz.github.io/archive.html</loc>
-    <lastmod>2022-08-19T15:48:51.699Z</lastmod>
+    <lastmod>2022-08-19T20:58:53.509Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/blog.html</loc>
-    <lastmod>2022-08-19T15:48:52.271Z</lastmod>
+    <lastmod>2022-08-19T20:59:05.994Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/index.html</loc>
-    <lastmod>2022-08-19T15:36:06.021Z</lastmod>
+    <lastmod>2022-08-19T20:58:54.795Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html</loc>
-    <lastmod>2022-08-19T15:48:50.945Z</lastmod>
+    <lastmod>2022-08-19T20:58:55.677Z</lastmod>
+  </url>
+  <url>
+    <loc>https://datadavidz.github.io/posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html</loc>
+    <lastmod>2022-08-19T20:59:16.380Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/posts/post-with-code/index.html</loc>
-    <lastmod>2022-08-19T15:36:07.516Z</lastmod>
+    <lastmod>2022-08-19T20:58:57.244Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/posts/welcome/index.html</loc>
-    <lastmod>2022-08-19T15:36:07.981Z</lastmod>
+    <lastmod>2022-08-19T20:58:57.691Z</lastmod>
   </url>
 </urlset>

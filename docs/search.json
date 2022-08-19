@@ -4,14 +4,14 @@
     "href": "archive.html",
     "title": "Archive",
     "section": "",
-    "text": "Aug 19, 2022\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nAug 18, 2022\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nAug 15, 2022\n\n\n\n\n\n\nNo matching items"
+    "text": "Aug 26, 2022\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nAug 19, 2022\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nAug 18, 2022\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nAug 15, 2022\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "blog.html",
     "href": "blog.html",
     "title": "blog",
     "section": "",
-    "text": "Aug 19, 2022\n\n\ndatadavidz\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\n\n\nAug 18, 2022\n\n\nHarlow Malloc\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\n\n\nAug 15, 2022\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
+    "text": "Aug 26, 2022\n\n\ndatadavidz\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nAug 19, 2022\n\n\ndatadavidz\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\n\n\nAug 18, 2022\n\n\nHarlow Malloc\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\n\n\nAug 15, 2022\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "index.html",
@@ -26,6 +26,34 @@
     "title": "Introduction to the Concrete Dataset",
     "section": "",
     "text": "One such dataset is the Concrete Compressive Strength Dataset found on the UCI Machine Learning Repository. Many thanks to the original owner, Prof. I-Cheng Yeh for making this dataset available to the public!\nConventional concrete contains cement, fine and coarse aggregates and water. High performance concrete incorporates additional ingredients such as fly ash, blast furnace slag and chemical additives like superplasticizer. The compressive strength of concrete has been empirically found to have an inverse relationship to the water-to-cement ratio also known as the Abrams’ rule. High performance concrete is a more complex material and experimental data does not always support this general rule. This dataset contains over 1000 high performance concrete formulations containing the ingredients described above along with the compressive strength of each formulation. In addition, the age of the concrete before testing is also recorded.\n\nBasic Analysis of the Concrete Dataset\nThe concrete dataset was downloaded from the UCI repository as an Excel file and imported into R using the readxl package without further modification. Once the dataset was loaded into R, the column names were cleaned up into a format more amenable to data analysis. The complete dataset contains 1030 rows of concrete formulations of which the first 5 are shown below.\n\nlibrary(readxl)\nlibrary(tidyverse)\nlibrary(knitr)\n\n\nfilename <- \"Concrete_Data.xls\"\n\nfolder <- \"\"\nnumberCols <- 9 #total number of columns in spreadsheet\n\ncolTypes <- rep(\"numeric\", numberCols)\nconcrete_tbl <- read_excel(path = paste0(folder, filename), col_types = colTypes)\n\nconcrete_tbl <- concrete_tbl %>%\n  rename(cement = starts_with(\"Cement\")) %>%\n  rename(blast_furnace_slag = starts_with(\"Blast\")) %>%\n  rename(fly_ash = starts_with(\"Fly Ash\")) %>%\n  rename(water = starts_with(\"Water\")) %>%\n  rename(superplasticizer = starts_with(\"Super\")) %>%\n  rename(coarse_aggregate = starts_with(\"Coarse\")) %>%\n  rename(fine_aggregate = starts_with(\"Fine\")) %>%\n  rename(age = starts_with(\"Age\")) %>%\n  rename(compressive_strength = starts_with(\"Concrete\"))\n\n\nknitr::kable(head(concrete_tbl, 5), caption = \"First 5 Rows of Concrete Dataset\")\n\n\nFirst 5 Rows of Concrete Dataset\n\n\n\n\n\n\n\n\n\n\n\n\n\ncement\nblast_furnace_slag\nfly_ash\nwater\nsuperplasticizer\ncoarse_aggregate\nfine_aggregate\nage\ncompressive_strength\n\n\n\n\n540.0\n0.0\n0\n162\n2.5\n1040.0\n676.0\n28\n79.98611\n\n\n540.0\n0.0\n0\n162\n2.5\n1055.0\n676.0\n28\n61.88737\n\n\n332.5\n142.5\n0\n228\n0.0\n932.0\n594.0\n270\n40.26954\n\n\n332.5\n142.5\n0\n228\n0.0\n932.0\n594.0\n365\n41.05278\n\n\n198.6\n132.4\n0\n192\n0.0\n978.4\n825.5\n360\n44.29608"
+  },
+  {
+    "objectID": "posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html",
+    "href": "posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html",
+    "title": "Exploratory Analysis of the Concrete Dataset",
+    "section": "",
+    "text": "Several exploratory data analysis (EDA) packages are used to evaluate the concrete dataset.\nIn the previous post, the concrete dataset was introduced. In this post, we further explore topics such as data completeness, distributions and correlations both with the target variable (compressive strength) and between predictor variables (ingredients). I use Several R packages which I have found to make this analysis quite simple and efficient: skimr, GGally and correlationFunnel."
+  },
+  {
+    "objectID": "posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html#load-libraries",
+    "href": "posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html#load-libraries",
+    "title": "Exploratory Analysis of the Concrete Dataset",
+    "section": "Load libraries",
+    "text": "Load libraries\n\nlibrary(readxl)\nlibrary(tidyverse)\n\n#EDA\nlibrary(skimr)\nlibrary(GGally)\nlibrary(correlationfunnel)\n\nA good first analysis once the dataset is loaded is to use the skimr package to provide an overview of the data columns.\n\nskimr::skim(concrete_tbl)\n\n\nData summary\n\n\nName\nconcrete_tbl\n\n\nNumber of rows\n1030\n\n\nNumber of columns\n9\n\n\n_______________________\n\n\n\nColumn type frequency:\n\n\n\nnumeric\n9\n\n\n________________________\n\n\n\nGroup variables\nNone\n\n\n\nVariable type: numeric\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nskim_variable\nn_missing\ncomplete_rate\nmean\nsd\np0\np25\np50\np75\np100\nhist\n\n\n\n\ncement\n0\n1\n281.17\n104.51\n102.00\n192.38\n272.90\n350.00\n540.0\n▆▇▇▃▂\n\n\nblast_furnace_slag\n0\n1\n73.90\n86.28\n0.00\n0.00\n22.00\n142.95\n359.4\n▇▂▃▁▁\n\n\nfly_ash\n0\n1\n54.19\n64.00\n0.00\n0.00\n0.00\n118.27\n200.1\n▇▁▂▂▁\n\n\nwater\n0\n1\n181.57\n21.36\n121.75\n164.90\n185.00\n192.00\n247.0\n▁▅▇▂▁\n\n\nsuperplasticizer\n0\n1\n6.20\n5.97\n0.00\n0.00\n6.35\n10.16\n32.2\n▇▆▁▁▁\n\n\ncoarse_aggregate\n0\n1\n972.92\n77.75\n801.00\n932.00\n968.00\n1029.40\n1145.0\n▃▅▇▅▂\n\n\nfine_aggregate\n0\n1\n773.58\n80.18\n594.00\n730.95\n779.51\n824.00\n992.6\n▂▃▇▃▁\n\n\nage\n0\n1\n45.66\n63.17\n1.00\n7.00\n28.00\n56.00\n365.0\n▇▁▁▁▁\n\n\ncompressive_strength\n0\n1\n35.82\n16.71\n2.33\n23.71\n34.44\n46.14\n82.6\n▅▇▇▃▁\n\n\n\n\n\nThe good news is that there were no missing data points in the concrete dataset. There are concrete compositions with no blast furnace slag, fly ash or superplasticizer. The age before testing is skewed to lower age before testing. These observations are further supported looking at the histograms shown below.\n\nconcrete_tbl %>%\n  pivot_longer(cement:age, names_to=\"ingredient\", values_to = \"amount\") %>%\n  ggplot(aes(x=amount)) +\n  geom_histogram(bins = 30) +\n  facet_wrap(~ingredient, scales = \"free\")"
+  },
+  {
+    "objectID": "posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html#variable-correlations",
+    "href": "posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html#variable-correlations",
+    "title": "Exploratory Analysis of the Concrete Dataset",
+    "section": "Variable correlations",
+    "text": "Variable correlations\nNext, we analyze the correlations between variables. When the amount of one ingredient is increased, we expect one or more of the other ingredients in the concrete mixture to decrease. So, some correlation between the concrete ingredients is expected.\n\nGGally::ggcorr(concrete_tbl)\n\n\n\n\nThe correlation analysis showed a strong, positive correlation with cement content and compressive strength and less strong correlations with age with compressive strength and superplasticizer with compressive strength. An inverse correlation between water and superplasticizer was detected perhaps due to the water content of the superplasticizer requiring less additional water in the formulation.\nAnother way of visualizing the correlation of variables with the property you wish to predict is the called a “correlation funnel”.\n\nconcrete_tbl %>%\n  binarize(n_bins = 3) %>%\n  correlate(`compressive_strength__41.36856_Inf`) %>%\n  plot_correlation_funnel(interactive = FALSE)\n\n\n\n\nThe correlation funnel shows some degree of correlation between the cement, water, superplasticizer and age with compressive strength. The fly ash, coarse and fine aggregate and blast furnace slag showed very little correlation with compressive strength."
+  },
+  {
+    "objectID": "posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html#summary",
+    "href": "posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html#summary",
+    "title": "Exploratory Analysis of the Concrete Dataset",
+    "section": "Summary",
+    "text": "Summary\nThis post has shown several techniques for exploring the concrete dataset. The next post will use a generalized linear modeling approach to predict concrete compressive strength and compare the results with the conventional material modeling approach. Subsequent articles will use machine learning techniques such as artificial neural networks and extreme gradient boosting."
   },
   {
     "objectID": "posts/post-with-code/index.html",
