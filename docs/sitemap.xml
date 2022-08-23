@@ -2,11 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://datadavidz.github.io/archive.html</loc>
-    <lastmod>2022-08-19T22:02:03.479Z</lastmod>
+    <lastmod>2022-08-23T18:57:50.921Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/blog.html</loc>
-    <lastmod>2022-08-19T22:02:04.182Z</lastmod>
+    <lastmod>2022-08-23T18:57:51.650Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/index.html</loc>
@@ -31,5 +31,9 @@
   <url>
     <loc>https://datadavidz.github.io/posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html</loc>
     <lastmod>2022-08-19T22:02:12.947Z</lastmod>
+  </url>
+  <url>
+    <loc>https://datadavidz.github.io/posts/2022-09-10_ConcreteNLS/2022-09-10_ConcreteNLS.html</loc>
+    <lastmod>2022-08-23T18:57:57.646Z</lastmod>
   </url>
 </urlset>
