@@ -2,11 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://datadavidz.github.io/archive.html</loc>
-    <lastmod>2022-08-25T20:30:02.799Z</lastmod>
+    <lastmod>2022-08-30T23:55:53.207Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/blog.html</loc>
-    <lastmod>2022-08-25T20:30:03.583Z</lastmod>
+    <lastmod>2022-08-30T23:55:54.295Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/index.html</loc>
@@ -30,22 +30,26 @@
   </url>
   <url>
     <loc>https://datadavidz.github.io/posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html</loc>
-    <lastmod>2022-08-19T22:02:12.947Z</lastmod>
+    <lastmod>2022-08-30T23:55:46.130Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/posts/2022-09-10_ConcreteNLS/2022-09-10_ConcreteNLS.html</loc>
-    <lastmod>2022-08-23T18:57:57.646Z</lastmod>
+    <lastmod>2022-08-30T23:55:47.569Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/posts/2022-09-17_ConcreteMLP/2022-09-17_ConcreteMLP.html</loc>
-    <lastmod>2022-08-23T21:26:13.949Z</lastmod>
+    <lastmod>2022-08-30T23:55:49.125Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/posts/2022-09-24_ConcreteXGB/2022-09-24_ConcreteXGB.html</loc>
-    <lastmod>2022-08-25T15:52:44.226Z</lastmod>
+    <lastmod>2022-08-30T23:55:50.546Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/posts/2022-10-01_ConcreteRF/2022-10-01_ConcreteRF.html</loc>
-    <lastmod>2022-08-25T20:30:05.354Z</lastmod>
+    <lastmod>2022-08-30T23:55:52.038Z</lastmod>
+  </url>
+  <url>
+    <loc>https://datadavidz.github.io/posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html</loc>
+    <lastmod>2022-08-30T23:56:03.311Z</lastmod>
   </url>
 </urlset>
