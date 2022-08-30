@@ -184,3 +184,13 @@ collect_predictions(final_res) %>%
 ## Summary
 
 The single-layer, feed-forward neural network had an R^2^ of 0.87 and RMSE of 6.5 MPa.
+
+```{r}
+#| include: false
+#save the metrics
+#collect_metrics(final_res) %>% mutate(model = "mlp") %>% saveRDS(file = "../results/concrete_mlp_metrics.rds")
+
+#fit final model with all data and save
+#fit(final_nnet, data = concrete_tbl) %>% saveRDS(file = "../results/concrete_mlp_model.rds")
+```
+
