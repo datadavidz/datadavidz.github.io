@@ -186,6 +186,17 @@ collect_predictions(final_res) %>%
        x = "Actual Compressive Strength (MPa)", 
        y = "Predicted Compressive Strength (MPa)")
 ```
+## Summary
+The regularized linear model had relatively poor predictive performance (RMSE = 11.4 MPa, R^2^ = 0.62).  A non-linear, least squares model will be built with improved perfomance in the next post.
+
+```{r}
+#| include: false
+#save the metrics
+#collect_metrics(final_res) %>% mutate(model = "glm") %>% saveRDS(file = "../results/concrete_glm_metrics.rds")
+
+#fit final model with all data and save
+#fit(final_glmnet, data = concrete_tbl) %>% saveRDS(file = "../results/concrete_glm_model.rds")
+```
 
 
 
