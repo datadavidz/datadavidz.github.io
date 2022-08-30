@@ -190,4 +190,11 @@ collect_predictions(final_res) %>%
 The random forest model to predict the compressive strength of concrete performed better (RMSE = 5.0 MPa, R^2^ = 0.93) than a conventional materials model(RMSE = 7.9 MPa, R^2^ = 0.78) but not quite as good as the XGBoost model (RMSE = 4.3 MPa, R^2^ = 0.945).
 
 
+```{r}
+#| include: false
+#save the metrics
+#collect_metrics(final_res) %>% mutate(model = "rf") %>% saveRDS(file = "../results/concrete_rf_metrics_new.rds")
 
+#fit final model with all data and save
+#fit(final_rf, data = concrete_tbl) %>% saveRDS(file = "../results/concrete_rf_model_new.rds")
+```
