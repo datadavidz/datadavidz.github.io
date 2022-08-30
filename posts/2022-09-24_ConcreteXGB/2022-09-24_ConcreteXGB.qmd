@@ -177,6 +177,14 @@ collect_predictions(final_res) %>%
 ## Summary
 The XGBoost model to predict the compressive strength of concrete performed better (RMSE = 4.3 MPa, R^2^ = 0.945) than a conventional materials model(RMSE = 7.9 MPa, R^2^ = 0.78).
 
+```{r}
+#| include: false
+#save the metrics
+#collect_metrics(final_res) %>% mutate(model = "xgboost") %>% saveRDS(file = "../results/concrete_xgb_metrics.rds")
+
+#fit final model with all data and save
+#fit(final_xgboost, data = concrete_tbl) %>% saveRDS(file = "../results/concrete_xgb_model.rds")
+```
 
 
 
