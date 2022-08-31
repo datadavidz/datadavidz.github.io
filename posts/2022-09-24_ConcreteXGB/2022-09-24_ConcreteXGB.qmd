@@ -1,6 +1,7 @@
 ---
 title: "Prediction of Concrete Strength using XGBoost"
 date: "2022-09-24"
+categories: [tidymodels]
 ---
 
 A gradient boosting model to predict the compressive strength of concrete was built using a tidymodels approach.
