@@ -161,7 +161,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <h1 class="title">Summary of Concrete Models</h1>
-                      </div>
+                                <div class="quarto-categories">
+                <div class="quarto-category">tidymodels</div>
+              </div>
+                  </div>
   </div>
     
   
@@ -199,12 +202,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="load-libraries-and-data" class="level2">
 <h2 class="anchored" data-anchor-id="load-libraries-and-data">Load libraries and data</h2>
 <div class="cell">
+<details>
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div class="cell">
+<details>
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>filename <span class="ot">&lt;-</span> <span class="st">"Concrete_Data.xls"</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>folder <span class="ot">&lt;-</span> <span class="st">"../data/"</span></span>
@@ -223,6 +231,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">fine_aggregate =</span> <span class="fu">starts_with</span>(<span class="st">"Fine"</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">age =</span> <span class="fu">starts_with</span>(<span class="st">"Age"</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">compressive_strength =</span> <span class="fu">starts_with</span>(<span class="st">"Concrete"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 </section>
 <section id="predictive-accuracy" class="level2">
@@ -281,19 +290,27 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2 class="anchored" data-anchor-id="benchmark-performance">Benchmark performance</h2>
 <p>Here we load the final models for the different approaches for comparison of prediction time. In this case, the time to make predictions for 10,300 (10 times the original dataset) was determined as a benchmark.</p>
 <div class="cell">
+<details>
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#load all the models</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>concrete_nls <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"../results/concrete_nls_model.rds"</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>concrete_glm <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"../results/concrete_glm_model.rds"</span>)</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>concrete_mlp <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"../results/concrete_mlp_model.rds"</span>)</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>concrete_rf <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"../results/concrete_rf_model.rds"</span>)</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>concrete_xgb <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"../results/concrete_xgb_model.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <p>Create the prediction dataset using 10 times the original dataset for purpose of comparing very fast prediction times.</p>
 <div class="cell">
+<details>
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>temp <span class="ot">&lt;-</span> concrete_tbl <span class="sc">%&gt;%</span> <span class="fu">slice</span>(<span class="fu">rep</span>(<span class="fu">row_number</span>(), <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <p>Benchmarking was performed in the following manner using Sys.time to capture the time before and after each set of model predictions.</p>
 <div class="cell">
+<details>
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>begin <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>a_temp <span class="ot">&lt;-</span> <span class="fu">predict</span>(concrete_nls, <span class="at">new_data =</span> temp)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>end1 <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
@@ -316,6 +333,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co"># print(end4 - end3)[[1]]</span></span>
 <span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co">#rm(temp)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <p>As shown in the figure and table below, the xgboost model was the slowest taking about 1 second to perform 10,300 predictions. For the example of making a prediction of compressive strength of concrete for a particular formulation, however, this amount of time is trivial and the increased accuracy would be preferred over a faster and less accurate model.</p>
 <div class="cell">
@@ -335,11 +353,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">nls</td>
-<td style="text-align: right;">3</td>
+<td style="text-align: right;">2</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">glm</td>
-<td style="text-align: right;">168</td>
+<td style="text-align: right;">128</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">mlp</td>
@@ -347,11 +365,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </tr>
 <tr class="even">
 <td style="text-align: left;">rf</td>
-<td style="text-align: right;">741</td>
+<td style="text-align: right;">558</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">xgboost</td>
-<td style="text-align: right;">771</td>
+<td style="text-align: right;">598</td>
 </tr>
 </tbody>
 </table>
