@@ -1,6 +1,7 @@
 ---
 title: "Neural Network for Concrete Dataset"
 date: "2022-09-17"
+categories: [tidymodels]
 ---
 
 A single-layer neural network is fit to predict concrete compressive strength.
