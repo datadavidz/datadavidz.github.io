@@ -1,13 +1,14 @@
 ---
-title: "GLM model for Concrete Strenght"
+title: "GLM model for Concrete Strength"
 date: "2022-09-03"
+categories: [tidymodels]
 ---
 
-A generalized linear model (GLM) was built to predict compressive strength of high-performance concrete formulations.
+A generalized linear model (GLM) was built to predict the compressive strength of high-performance concrete formulations.
 
 An elastic net regularization has been employed to develop the generalized linear model using the ```glmnet``` engine within the ```tidymodels``` framework.  These results will be compared with a conventional materials modeling approach in the next post.
 
-##Load libraries
+##Load libraries and data
 ```{r }
 #| warning: false
 library(readxl)
@@ -19,7 +20,6 @@ library(vip)
 ```
 
 ```{r load dataset}
-#| include: false
 filename <- "Concrete_Data.xls"
 
 folder <- "../data/"
@@ -187,7 +187,7 @@ collect_predictions(final_res) %>%
        y = "Predicted Compressive Strength (MPa)")
 ```
 ## Summary
-The regularized linear model had relatively poor predictive performance (RMSE = 11.4 MPa, R^2^ = 0.62).  A non-linear, least squares model will be built with improved perfomance in the next post.
+The regularized linear model had relatively poor predictive performance (RMSE = 11.4 MPa, R^2^ = 0.62).  A non-linear, least squares model will be built with better model performance in the next post.
 
 ```{r}
 #| include: false
