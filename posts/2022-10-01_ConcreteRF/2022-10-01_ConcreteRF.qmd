@@ -1,6 +1,7 @@
 ---
 title: "Random Forest Model for Concrete Dataset"
 date: "2022-10-01"
+categories: [tidymodels]
 ---
 
 A predictive model for compressive strength of concrete is built using a random forest algorithm.
