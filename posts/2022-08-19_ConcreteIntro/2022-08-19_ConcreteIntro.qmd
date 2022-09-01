@@ -2,6 +2,11 @@
 title: "Introduction to the Concrete Dataset"
 date: "2022-08-19"
 ---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
 
 I have a particular interest in the ability of machine learning algorithms to predict formulations and I am always searching for these types of datasets.  
 
@@ -42,5 +47,6 @@ concrete_tbl <- concrete_tbl %>%
 ```
 
 ```{r }
+#| warning: false
 knitr::kable(head(concrete_tbl, 5), caption = "First 5 Rows of Concrete Dataset")
 ```
