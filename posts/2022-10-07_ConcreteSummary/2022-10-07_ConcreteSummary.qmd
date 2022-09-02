@@ -4,6 +4,11 @@ date: "2022-10-07"
 categories: [tidymodels]
 code-fold: true
 ---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
 
 A comparison of the predictive performance and speed for the different modeling approaches.
 
@@ -98,7 +103,9 @@ temp <- concrete_tbl %>% slice(rep(row_number(), 10))
 ```
 
 Benchmarking was performed in the following manner using Sys.time to capture the time before and after each set of model predictions.
-```{r, results = "hide"}
+```{r}
+#| warning: false
+#| results: hide
 begin <- Sys.time()
 a_temp <- predict(concrete_nls, new_data = temp)
 end1 <- Sys.time()
@@ -156,3 +163,30 @@ model_times %>%
 ```
 ## Summary
 Prediction with the conventional model (nls) is about two orders of magnitude faster than the boosted tree model (xgboost).  It should be noted that the random forest model is about 40% faster than the xgboost model, in this case, with similar predictive accuracy.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
+
+
+

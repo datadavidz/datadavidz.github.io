@@ -2,11 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://datadavidz.github.io/archive.html</loc>
-    <lastmod>2022-09-02T19:02:50.449Z</lastmod>
+    <lastmod>2022-09-02T19:32:58.184Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/blog.html</loc>
-    <lastmod>2022-09-02T19:02:51.256Z</lastmod>
+    <lastmod>2022-09-02T19:32:58.924Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/index.html</loc>
@@ -50,6 +50,10 @@
   </url>
   <url>
     <loc>https://datadavidz.github.io/posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html</loc>
-    <lastmod>2022-08-31T21:20:14.042Z</lastmod>
+    <lastmod>2022-09-02T19:14:24.797Z</lastmod>
+  </url>
+  <url>
+    <loc>https://datadavidz.github.io/posts/2022-09-02_ReticulateSetup/2022-09-02_ReticulateSetup.html</loc>
+    <lastmod>2022-09-02T19:33:04.034Z</lastmod>
   </url>
 </urlset>
