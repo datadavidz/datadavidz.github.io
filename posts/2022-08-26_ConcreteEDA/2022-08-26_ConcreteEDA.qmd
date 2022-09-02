@@ -2,6 +2,11 @@
 title: "Exploratory Analysis of the Concrete Dataset"
 date: "2022-08-26"
 ---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
 
 Several exploratory data analysis (EDA) packages are used to evaluate the concrete dataset.
 
@@ -79,3 +84,28 @@ The correlation funnel shows some degree of correlation between the cement, wate
 
 ## Summary
 This post has shown several techniques for exploring the concrete dataset.  The next post will use a generalized linear modeling approach to predict concrete compressive strength and compare the results with the conventional material modeling approach.  Subsequent articles will use machine learning techniques such as artificial neural networks and extreme gradient boosting.
+
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r, echo = FALSE}
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+
+:::
+
