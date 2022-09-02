@@ -195,6 +195,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
+<div class="cell">
+
+</div>
 <p>Fitting the concrete dataset to a pre-determined equation using a non-linear, least squares approximation.</p>
 <p>Abrams’ law states that the strength of a concrete mix is inversely related to the mass ratio of water to cement. In other words, as the water content increases, the strength of the concrete decreases. Experimental data however shows that this law does not provide the complete picture and concrete formulations with the same water:cement can have significantly different performance.</p>
 <section id="load-libraries-and-data" class="level2">
@@ -241,7 +244,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Concrete Compressive Strength vs. Water:Cement"</span>,</span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Water:Cement"</span>, <span class="at">y =</span> <span class="st">"Compressive Strength (MPa)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="2022-09-10_ConcreteNLS_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+<p><img src="2022-09-10_ConcreteNLS_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>It is apparent from the plot above that water:cement is not the only factor important for determining the compressive strength of concrete. For example, there are multiple formulations with a water:cement of ~1 with a range of compressive strengths from less than 10 MPa to greater than 50 MPa. The age of the concrete at the time of testing is also recognized as an important factor in determining the concrete strength for a sample.</p>
@@ -287,7 +290,7 @@ Achieved convergence tolerance: 3.529e-06</code></pre>
 <p>Visualize actual vs.&nbsp;predicted compressive strength for water:cement model.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="2022-09-10_ConcreteNLS_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+<p><img src="2022-09-10_ConcreteNLS_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <section id="nls-fit-using-waterbinder" class="level3">
@@ -319,7 +322,7 @@ Achieved convergence tolerance: 2.226e-06</code></pre>
 <p>Visualize actual vs.&nbsp;predicted compressive strength for water:binder model.</p>
 <div class="cell">
 <div class="cell-output-display">
-<p><img src="2022-09-10_ConcreteNLS_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+<p><img src="2022-09-10_ConcreteNLS_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
@@ -327,6 +330,60 @@ Achieved convergence tolerance: 2.226e-06</code></pre>
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
 <p>The NLS model using water:binder was a better fit to the experimental data than the NLS model using water:cement. The R<sup>2</sup> for the water:binder model was 0.78 compared to an R<sup>2</sup> of 0.65 for the water:cement model.</p>
+<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Expand for Session Info
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.2.0 (2022-04-22 ucrt)
+ os       Windows 10 x64 (build 19043)
+ system   x86_64, mingw32
+ ui       RTerm
+ language (EN)
+ collate  English_United States.utf8
+ ctype    English_United States.utf8
+ tz       America/Chicago
+ date     2022-09-02
+ pandoc   2.18 @ C:/Program Files/RStudio/bin/quarto/bin/tools/ (via rmarkdown)
+ quarto   1.0.36 @ C:\\PROGRA~1\\RStudio\\bin\\quarto\\bin\\quarto.cmd
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ ! package     * version date (UTC) lib source
+ P dplyr       * 1.0.10  2022-09-01 [?] CRAN (R 4.2.0)
+ P forcats     * 0.5.2   2022-08-19 [?] CRAN (R 4.2.1)
+ P ggplot2     * 3.3.6   2022-05-03 [?] CRAN (R 4.2.1)
+ P purrr       * 0.3.4   2020-04-17 [?] CRAN (R 4.2.1)
+ P readr       * 2.1.2   2022-01-30 [?] CRAN (R 4.2.1)
+ P readxl      * 1.4.1   2022-08-17 [?] CRAN (R 4.2.1)
+ P sessioninfo * 1.2.2   2021-12-06 [?] CRAN (R 4.2.1)
+ P stringr     * 1.4.1   2022-08-20 [?] CRAN (R 4.2.1)
+ P tibble      * 3.1.8   2022-07-22 [?] CRAN (R 4.2.1)
+ P tidyr       * 1.2.0   2022-02-01 [?] CRAN (R 4.2.1)
+ P tidyverse   * 1.3.2   2022-07-18 [?] CRAN (R 4.2.1)
+
+ [1] C:/Users/David Zoller/AppData/Local/Temp/RtmpIHRddC/renv-library-22e4303bbb
+ [2] C:/Users/David Zoller/Documents/datadavidz.github.io/renv/library/R-4.2/x86_64-w64-mingw32
+ [3] C:/Program Files/R/R-4.2.0/library
+
+ P ── Loaded and on-disk path mismatch.
+
+──────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 
 
 </section>

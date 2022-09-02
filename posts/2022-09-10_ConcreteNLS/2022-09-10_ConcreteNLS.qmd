@@ -2,6 +2,11 @@
 title: "Conventional Material Models for Concrete Dataset"
 date: "2022-09-10"
 ---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
 
 Fitting the concrete dataset to a pre-determined equation using a non-linear, least squares approximation.
 
@@ -135,3 +140,26 @@ The NLS model using water:binder was a better fit to the experimental data than 
 # csFit_wb %>% saveRDS(file = "../results/concrete_nls_model.rds")
 ```
 
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
