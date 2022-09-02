@@ -3,6 +3,11 @@ title: "Prediction of Concrete Strength using XGBoost"
 date: "2022-09-24"
 categories: [tidymodels]
 ---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
 
 A gradient boosting model to predict the compressive strength of concrete was built using a tidymodels approach.
 
@@ -13,9 +18,11 @@ In this post, we will begin to use machine learning techniques for predicting co
 #| warning: false
 library(readxl)
 library(tidyverse)
+library(ragg)
 
 #Tidymodels
 library(tidymodels)
+library(xgboost)
 library(vip)
 ```
 
@@ -187,5 +194,27 @@ The XGBoost model to predict the compressive strength of concrete performed bett
 #fit(final_xgboost, data = concrete_tbl) %>% saveRDS(file = "../results/concrete_xgb_model.rds")
 ```
 
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
 
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
 
