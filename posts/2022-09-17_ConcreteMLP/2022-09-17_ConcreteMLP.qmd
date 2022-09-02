@@ -3,6 +3,11 @@ title: "Neural Network for Concrete Dataset"
 date: "2022-09-17"
 categories: [tidymodels]
 ---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
 
 A single-layer neural network is fit to predict concrete compressive strength.
 
@@ -195,3 +200,26 @@ The single-layer, feed-forward neural network had an R^2^ of 0.87 and RMSE of 6.
 #fit(final_nnet, data = concrete_tbl) %>% saveRDS(file = "../results/concrete_mlp_model.rds")
 ```
 
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
