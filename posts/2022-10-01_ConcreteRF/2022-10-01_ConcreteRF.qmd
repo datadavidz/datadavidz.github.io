@@ -3,6 +3,11 @@ title: "Random Forest Model for Concrete Dataset"
 date: "2022-10-01"
 categories: [tidymodels]
 ---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
 
 A predictive model for compressive strength of concrete is built using a random forest algorithm.
 
@@ -16,6 +21,7 @@ library(tidyverse)
 
 #Tidymodels
 library(tidymodels)
+library(ranger)
 library(vip)
 ```
 
@@ -199,3 +205,27 @@ The random forest model to predict the compressive strength of concrete performe
 #fit final model with all data and save
 #fit(final_rf, data = concrete_tbl) %>% saveRDS(file = "../results/concrete_rf_model_new.rds")
 ```
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::

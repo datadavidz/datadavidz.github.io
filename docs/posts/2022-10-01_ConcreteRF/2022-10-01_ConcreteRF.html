@@ -197,6 +197,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
+<div class="cell">
+
+</div>
 <p>A predictive model for compressive strength of concrete is built using a random forest algorithm.</p>
 <p>In this post, we will begin to use machine learning techniques for predicting compressive strength of formulations using the concrete dataset. In a previous post, we created a model using a conventional material modeling approach which resulted in an R<sup>2</sup> of 0.78. Here we will use a random forest model to predict compressive strength and compare the results with the conventional material model.</p>
 <section id="load-libraries-and-data" class="level2">
@@ -207,7 +210,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Tidymodels</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vip)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ranger)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vip)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>filename <span class="ot">&lt;-</span> <span class="st">"Concrete_Data.xls"</span></span>
@@ -314,7 +318,7 @@ Computational engine: ranger </code></pre>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>() <span class="sc">+</span></span>
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Max Entropy Grid"</span>, <span class="at">x =</span> <span class="st">"min n"</span>, <span class="at">y =</span> <span class="st">"mtry"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="2022-10-01_ConcreteRF_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+<p><img src="2022-10-01_ConcreteRF_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Define a workflow for the tuning process</p>
@@ -324,7 +328,7 @@ Computational engine: ranger </code></pre>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_model</span>(rf_spec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Hyperparameter tuning is now performed using the tune_grid() function from the tune package. Here we specific the formula, model, resamples, grid and metrics. The metrics come from the yardstick package. For regression problems, we can specify multiple metrics such as mae, mape, rmse and rsq into a metric_set().</p>
-<div class="cell" data-hash="2022-10-01_ConcreteRF_cache/html/unnamed-chunk-18_1537a80b585c3a0ad21e61793a0e9c31">
+<div class="cell" data-hash="2022-10-01_ConcreteRF_cache/html/unnamed-chunk-10_dbb1ab1f75b7f190ee9c3b87618c0310">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>doParallel<span class="sc">::</span><span class="fu">registerDoParallel</span>()</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">456</span>)</span>
@@ -362,7 +366,7 @@ Computational engine: ranger </code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(rf_res)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="2022-10-01_ConcreteRF_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672"></p>
+<p><img src="2022-10-01_ConcreteRF_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Select the best parameters based on the lowest mean absolute error.</p>
@@ -417,7 +421,7 @@ Computational engine: ranger </code></pre>
 <span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">vip</span>(<span class="at">aesthetics =</span> <span class="fu">list</span>(<span class="at">fill =</span> <span class="st">"steelblue"</span>)) <span class="sc">+</span></span>
 <span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Random Forest Model Importance - Compressive Strength (MPa) Prediction"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="2022-10-01_ConcreteRF_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid" width="672"></p>
+<p><img src="2022-10-01_ConcreteRF_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <section id="stage-3-train-final-model" class="level3">
@@ -449,7 +453,7 @@ Computational engine: ranger </code></pre>
 <span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Actual Compressive Strength (MPa)"</span>, </span>
 <span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Predicted Compressive Strength (MPa)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="2022-10-01_ConcreteRF_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid" width="672"></p>
+<p><img src="2022-10-01_ConcreteRF_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 </section>
@@ -457,6 +461,75 @@ Computational engine: ranger </code></pre>
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
 <p>The random forest model to predict the compressive strength of concrete performed better (RMSE = 5.0 MPa, R<sup>2</sup> = 0.93) than a conventional materials model(RMSE = 7.9 MPa, R<sup>2</sup> = 0.78) but not quite as good as the XGBoost model (RMSE = 4.3 MPa, R<sup>2</sup> = 0.945).</p>
+<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Expand for Session Info
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.2.0 (2022-04-22 ucrt)
+ os       Windows 10 x64 (build 19043)
+ system   x86_64, mingw32
+ ui       RTerm
+ language (EN)
+ collate  English_United States.utf8
+ ctype    English_United States.utf8
+ tz       America/Chicago
+ date     2022-09-02
+ pandoc   2.18 @ C:/Program Files/RStudio/bin/quarto/bin/tools/ (via rmarkdown)
+ quarto   1.0.36 @ C:\\PROGRA~1\\RStudio\\bin\\quarto\\bin\\quarto.cmd
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ ! package      * version date (UTC) lib source
+ P broom        * 1.0.1   2022-08-29 [?] CRAN (R 4.2.1)
+ P dials        * 1.0.0   2022-06-14 [?] CRAN (R 4.2.1)
+ P dplyr        * 1.0.10  2022-09-01 [?] CRAN (R 4.2.0)
+ P forcats      * 0.5.2   2022-08-19 [?] CRAN (R 4.2.1)
+ P ggplot2      * 3.3.6   2022-05-03 [?] CRAN (R 4.2.1)
+ P infer        * 1.0.3   2022-08-22 [?] CRAN (R 4.2.1)
+ P modeldata    * 1.0.0   2022-07-01 [?] CRAN (R 4.2.1)
+ P parsnip      * 1.0.0   2022-06-16 [?] CRAN (R 4.2.1)
+ P purrr        * 0.3.4   2020-04-17 [?] CRAN (R 4.2.1)
+ P ranger       * 0.14.1  2022-06-18 [?] CRAN (R 4.2.1)
+ P readr        * 2.1.2   2022-01-30 [?] CRAN (R 4.2.1)
+ P readxl       * 1.4.1   2022-08-17 [?] CRAN (R 4.2.1)
+ P recipes      * 1.0.1   2022-07-07 [?] CRAN (R 4.2.1)
+ P rsample      * 1.0.0   2022-06-24 [?] CRAN (R 4.2.1)
+ P scales       * 1.2.1   2022-08-20 [?] CRAN (R 4.2.1)
+ P sessioninfo  * 1.2.2   2021-12-06 [?] CRAN (R 4.2.1)
+ P stringr      * 1.4.1   2022-08-20 [?] CRAN (R 4.2.1)
+ P tibble       * 3.1.8   2022-07-22 [?] CRAN (R 4.2.1)
+ P tidymodels   * 1.0.0   2022-07-13 [?] CRAN (R 4.2.1)
+ P tidyr        * 1.2.0   2022-02-01 [?] CRAN (R 4.2.1)
+ P tidyverse    * 1.3.2   2022-07-18 [?] CRAN (R 4.2.1)
+ P tune         * 1.0.0   2022-07-07 [?] CRAN (R 4.2.1)
+ P vip          * 0.3.2   2020-12-17 [?] CRAN (R 4.0.5)
+ P workflows    * 1.0.0   2022-07-05 [?] CRAN (R 4.2.1)
+ P workflowsets * 1.0.0   2022-07-12 [?] CRAN (R 4.2.1)
+ P yardstick    * 1.0.0   2022-06-06 [?] CRAN (R 4.2.1)
+
+ [1] C:/Users/David Zoller/AppData/Local/Temp/RtmpIPfqiD/renv-library-11c44d35eb2
+ [2] C:/Users/David Zoller/Documents/datadavidz.github.io/renv/library/R-4.2/x86_64-w64-mingw32
+ [3] C:/Program Files/R/R-4.2.0/library
+
+ P ── Loaded and on-disk path mismatch.
+
+──────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 
 
 </section>
