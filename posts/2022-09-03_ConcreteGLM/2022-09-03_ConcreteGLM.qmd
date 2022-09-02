@@ -3,6 +3,11 @@ title: "GLM model for Concrete Strength"
 date: "2022-09-03"
 categories: [tidymodels]
 ---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
 
 A generalized linear model (GLM) was built to predict the compressive strength of high-performance concrete formulations.
 
@@ -198,5 +203,26 @@ The regularized linear model had relatively poor predictive performance (RMSE = 
 #fit(final_glmnet, data = concrete_tbl) %>% saveRDS(file = "../results/concrete_glm_model.rds")
 ```
 
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
 
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
 
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
