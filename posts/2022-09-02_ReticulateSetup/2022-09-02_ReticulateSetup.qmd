@@ -1,6 +1,6 @@
 ---
 title: "Python Setup in RStudio using reticulate"
-date: "22-09-02"
+date: "2022-09-02"
 categories: [reticulate]
 ---
 ```{r}
