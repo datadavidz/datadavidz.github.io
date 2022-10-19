@@ -9,16 +9,18 @@ categories: [tidymodels, MLOps]
 renv::use(lockfile = "renv.lock")
 ```
 
-An XGBoost model for predicting concrete strength is transformed into a deployable model object and store it in an AWS S3 container.
+An XGBoost model for predicting concrete strength is transformed into a deployable model object and uploaded to an AWS S3 container.
 
 In this post, I will take the XGBoost model for predicting concrete compressive strength described in a previous [post](https://datadavidz.github.io/posts/2022-09-24_ConcreteXGB/2022-09-24_ConcreteXGB.html), convert the model into a deployable model object using ```vetiver```and "pin" it to an S3 bucket.  The purpose of this effort is to make the model accessible in the cloud to an API running in a different location.  The development of the API will be discussed in the next post.  S3 stands for the AWS Simple Storage Service which exists in the cloud.  I chose AWS over other ```vetiver```-compatible options simply because I already had an existing account.   
 
 ## Build the model (again)
 This section just performs the steps to build the XGBoost model described in detail in the previous post.
 
-Load the libraries.
+*Expand to see the code*
 ```{r}
 #| warning: false
+#| message: false
+#| code-fold: true
 library(readxl)
 library(tidyverse)
 
@@ -29,10 +31,8 @@ library(xgboost)
 #MLOps
 library(vetiver)
 library(pins)
-```
 
-Load the dataset.
-```{r}
+#Load the dataset
 filename <- "Concrete_Data.xls"
 
 folder <- "../data/"
@@ -51,25 +51,18 @@ concrete_tbl <- concrete_tbl %>%
   rename(fine_aggregate = starts_with("Fine")) %>%
   rename(age = starts_with("Age")) %>%
   rename(compressive_strength = starts_with("Concrete"))
-```
 
-Split the data into training and testing datasets.
-```{r}
+#Split the data into training and testing datasets
 set.seed(123)
 concrete_split <- initial_split(concrete_tbl, prop = 0.80)
 concrete_train <- training(concrete_split)
 concrete_test <- testing(concrete_split)
-```
 
-Create the model recipe.
-```{r}
+#Create the model recipe
 concrete_rec <- recipe(compressive_strength ~ ., data = concrete_train) %>%
   step_normalize(all_predictors())
-  
-concrete_rec
-```
-Create the model specification. Parameters were specified from tuning in previous post.
-```{r}
+
+#Create the model specification. Parameters were specified from tuning in a previous post.
 xgboost_spec = boost_tree(
   trees = 1000,
   min_n = 18,
@@ -79,22 +72,15 @@ xgboost_spec = boost_tree(
   set_engine("xgboost") %>%
   set_mode("regression")
 
-xgboost_spec
-```
-Create the modeling workflow.
-```{r}
+#Create the modeling workflow
 concrete_wf <- workflow() %>%
   add_recipe(concrete_rec) %>%
   add_model(xgboost_spec)
-```
 
-Fit model on train and evaluate on test.
-```{r}
+#Fit model on train and evaluate on test.
 final_res <- last_fit(concrete_wf, concrete_split, metrics = metric_set(rmse, rsq, mae))
-```
 
-Assess final model performance metrics.
-```{r}
+#Assess final model performance metrics
 collect_metrics(final_res)
 ```
 
@@ -111,7 +97,7 @@ v
 ```
 ## Pins and AWS s3
 
-The ```pins``` package allows you to save data, models or R objects to the cloud such as an AWS S3 container.  A new S3 container can be set up within AWS.  In my case, I just used the default settings with the name ```pins-test-zoller```.  A security id and access key needs to be set up to enable saving of data from your local computer to the S3 container.  In your AWS account options under Security Credentials, you can configure your security id and access key and save the file to your local computer.  There are multiple options to tell R where to find this information but I preferred to create a shared AWS credentials file in a text editor as follows:
+The ```pins``` package allows you to save data, models or R objects to the cloud such as an AWS S3 container.  A new S3 container can be set up within AWS.  In my case, I just used the default settings for the S3 bucket with the name ```pins-test-zoller```.  A security id and access key need to be set up to enable saving of data from your local computer to the S3 container.  In your AWS account options under Security Credentials, you can configure your security id and access key and save the file to your local computer.  There are multiple options to tell R where to find this information but I preferred to create a shared AWS credentials file in a text editor as follows:
 
 ```
 [default]
@@ -126,7 +112,7 @@ You can then connect to the board where you want to place the pin using ```board
 board <- board_s3("pins-test-zoller", region = "us-east-2")
 board %>% vetiver_pin_write(v)
 ```
-In the AWS S3 bucket with the name "pins-test-zoller", a new folder is created with the same name as the model, concrete-xgb.  Within this folder, there is a subfolder with the named according to the model version number and, within the subfolder, is the model object in rds form (concrete-xgb.rds) and a data.txt file with brief information about the model object.
+In the AWS S3 bucket with the name "pins-test-zoller", a new folder is created with the same name as the model, concrete-xgb.  Within this folder, there is a subfolder with the named according to the model version number and, within the subfolder, is the model object in rds form (concrete-xgb.rds) and a data.txt file with summary information about the model object.
 
 ## Summary
 
