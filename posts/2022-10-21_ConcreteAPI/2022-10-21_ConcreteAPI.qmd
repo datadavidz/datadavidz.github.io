@@ -1,0 +1,122 @@
+---
+title: "Create a Dockerized API Running on an AWS EC2 instance"
+date: "2022-10-21"
+categories: [tidymodels, MLOps]
+---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
+
+An Application Programming Interface (API) to predict concrete compressive strength is implemented in the cloud using an AWS EC2 instance.
+
+In this post, we create an API for the deployable model object pinned to an S3 bucket as described in the previous [post](https://datadavidz.github.io/posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html).  We start by creating an Elastic Compute (EC2) instance on AWS to run the API.  The ```vetiver``` package is used to write a Dockerfile for running the API inside a Docker container on the EC2 instance.  The R script to run a ```plumber``` API for the model object is also created using the ```vetiver``` package.  The EC2 instance is set up with Docker and the container is created from the Dockerfile.  The API can then be run to provide compressive strength predictions for different concrete formulations.
+
+## Create an EC2 instance to run a Docker container with a Plumber API
+
+I chose to use the Elastic Compute (EC2) service from AWS to run the API in a docker container.  The basics of setting up an EC2 instance are captured well in the [The Shiny AWS book](https://business-science.github.io/shiny-production-with-aws-book/aws-ec2-server-setup.html).  I mostly accepted the defaults offered by AWS as described below:
+
+1. Enter a name for the instance such as *docker-api-test*.
+2. Select *Amazon Machine Image (AMI)* for which I chose the free tier eligible, Amazon Linux (Amazon Linux 2 Kernel 5.10 AMI 2.0.20220912.1 x86_64 HVM gp2).
+3. Select the *Instance Type*.  Here is chose free tier eligible, *t2.micro* (1 CPU, 1 GB memory).
+4. Create a key-pair for security access (unless you already have one you would like to re-use). This generates a .pem file to save.
+5. Leave the *Network Settings* as default for now. These settings will need to be changed later.
+6. For *Storage*, I increased the amount to the free tier limit of 30 GB.
+7. No changes to *Detailed Settings*.
+8. Launch the instance.
+
+## Create a Security Group to Allow Access to the API
+
+The inbound and outbound rules need to be adjusted for the API to work properly.  I found an [article](https://mblukac.github.io/posts/2021/05/plumber_AWSEC2/) by Martin Lukac on "Deploying a plumber API to AWS EC2 instance" which contained the rules which also worked for me.
+
+Inbound rules:
+1. **Type:** SSH, **Protocol:** TCP, **Port:** 22, **Source:** 0.0.0.0/0 (by default this was added)
+2. **Type:** HTTP, **Protocol:** TCP, **Port:** 80, **Source:** 0.0.0.0/0
+3. **Type:** Custom TCP, **Protocol:** TCP, **Port:** 8000, **Source:** 0.0.0.0/0 (for accessing the API)
+4. **Type:** Custom ICMP Rule IPv4, **Protocol:** Echo Request, **Port:** N/A, **Source:** 0.0.0.0/0 (for testing)
+
+Outbound rule:
+1. Type: All traffic, Protocol: All, Port Range: All, Destination: 0.0.0.0/0 (by default this was added)
+
+The *Security Group* is then added to the proper EC2 instance.
+
+## Connecting to your EC2 instance with PuTTY
+
+You need to connect to your EC2 instance via an SSH client.  A convenient option for Windows users is [PuTTY](https://www.putty.org/) an SSH and telnet client originally developed by Simon Tatham. The website for the Alaska Satellite Facility has a nice walkthrough on setting up PuTTY to access your EC2 instance.
+
+### Generate a PuTTY private key file (.ppk)
+In brief, the steps to create the .ppk file from the AWS .pem file are as follows:
+
+1. Start the *puttygen.exe* program.
+2. Click on *Load* and find your .pem file you generated in Step 4 of *Create an EC2 Instance* above.
+3. Make sure *Type of key to generate* is set to **RSA**.
+4. Click on *Save private key*, name the file and save the ppk file.
+
+### Configure PuTTY to connect to your EC2 instance
+
+1. Start the *putty.exe* program
+2. Enter the Host name as ec2-user@*your_public_DNS* where your_public_DNS is listed in the description for your EC2 on the AWS console.  It should be something like *ec2-12-345-678-910.compute-1.amazonaws.com*.  Note: If you use an Ubuntu machine image the host name will begin with *ubuntu@* instead of *ec2-user@*.
+3. Make sure the *Port* is set to **22**.
+4. The *Connection type* needs to be set to **SSH**.
+5. In the *Category* pane on the left side of PuTTY configuration window, find the *Connection* category and expand the *SSH* options by clicking on the "+" and then click on *Auth*.
+6. Under Private key for authentification, click on the Browse button and load the ppk file you generated above.
+7. In the *Category* pane, click on *Session* and in the box under *Saved Sessions*, enter a name for this connection and then click on *Save*.
+
+### Connect to your EC2
+1. Start the *"putty.exe"* program.
+2. Click on the *Saved Sessions* you named in Step 7 above.
+3. Click on *Open* to bring up a terminal session connected to your EC2.
+
+## Load and Start Docker on EC2
+
+The AWS EC2 instance does not come pre-loaded with Docker so it needs to be installed.  A nice walkthrough can be found on the [Workfall Blog] (https://www.workfall.com/learning/blog/how-to-install-and-run-docker-containers-on-amazon-ec2-instance/).  You first need to connect to your EC2 instance with PuTTY as described above.  The next steps are as follows:
+
+1. Update the installed packages and package cache by running the command:```sudo yum update -y```
+2. Install the most recent Docker package by running the command: ```sudo amazon-linux-extras install docker```
+3. Start the Docker service: ```sudo service docker start```
+4. Add the ec2-user to the Docker group so you don't need to execute Docker commands with sudo: ```sudo usermod -a -G Docker ec2-user```
+5. Log out and log back into the EC2 instance and run a command to verify: ```docker info```
+
+## Write the Dockerfile and Plumber API script
+
+```{r}
+#| warning: false
+#| output: false
+library(vetiver)
+library(pins)
+
+board <- board_s3("pins-test-zoller", region = "us-east-2")
+v <- vetiver_pin_read(board, name = "concrete-xgb", version = "20221019T191525Z-b1278")
+
+vetiver_write_plumber(board, name = "concrete-xgb", version = "20221019T191525Z-b1278", rsconnect = FALSE)
+vetiver_write_docker(v)
+```
+The contents of the Dockerfile
+```
+# Generated by the vetiver package; edit with care
+
+FROM rocker/r-ver:4.2.0
+ENV RENV_CONFIG_REPOS_OVERRIDE https://packagemanager.rstudio.com/cran/latest
+
+RUN apt-get update -qq && apt-get install -y --no-install-recommends \
+  libcurl4-openssl-dev \
+  libicu-dev \
+  libsodium-dev \
+  libssl-dev \
+  make \
+  zlib1g-dev \
+  && apt-get clean
+
+COPY vetiver_renv.lock renv.lock
+RUN Rscript -e "install.packages('renv')"
+RUN Rscript -e "renv::restore()"
+COPY plumber.R /opt/ml/plumber.R
+EXPOSE 8000
+ENTRYPOINT ["R", "-e", "pr <- plumber::plumb('/opt/ml/plumber.R'); pr$run(host = '0.0.0.0', port = 8000)"]
+```
+
+
+
+
+
