@@ -2,6 +2,7 @@
   {
     "listing": "/archive.html",
     "items": [
+      "/posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html",
       "/posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html",
       "/posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html",
       "/posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html",
@@ -20,6 +21,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html",
       "/posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html",
       "/posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html",
       "/posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html",

@@ -30,16 +30,16 @@ I chose to use the Elastic Compute (EC2) service from AWS to run the API in a do
 
 The inbound and outbound rules need to be adjusted for the API to work properly.  I found an [article](https://mblukac.github.io/posts/2021/05/plumber_AWSEC2/) by Martin Lukac on "Deploying a plumber API to AWS EC2 instance" which contained the rules which also worked for me.
 
-Inbound rules:
-1. **Type:** SSH, **Protocol:** TCP, **Port:** 22, **Source:** 0.0.0.0/0 (by default this was added)
-2. **Type:** HTTP, **Protocol:** TCP, **Port:** 80, **Source:** 0.0.0.0/0
-3. **Type:** Custom TCP, **Protocol:** TCP, **Port:** 8000, **Source:** 0.0.0.0/0 (for accessing the API)
-4. **Type:** Custom ICMP Rule IPv4, **Protocol:** Echo Request, **Port:** N/A, **Source:** 0.0.0.0/0 (for testing)
-
-Outbound rule:
-1. Type: All traffic, Protocol: All, Port Range: All, Destination: 0.0.0.0/0 (by default this was added)
-
-The *Security Group* is then added to the proper EC2 instance.
+Inbound rules:  
+1. **Type:** SSH, **Protocol:** TCP, **Port:** 22, **Source:** 0.0.0.0/0 (by default this was added)  
+2. **Type:** HTTP, **Protocol:** TCP, **Port:** 80, **Source:** 0.0.0.0/0  
+3. **Type:** Custom TCP, **Protocol:** TCP, **Port:** 8000, **Source:** 0.0.0.0/0 (for accessing the API)  
+4. **Type:** Custom ICMP Rule IPv4, **Protocol:** Echo Request, **Port:** N/A, **Source:** 0.0.0.0/0 (for testing)  
+  
+Outbound rule:  
+1. Type: All traffic, Protocol: All, Port Range: All, Destination: 0.0.0.0/0 (by default this was added)  
+  
+The *Security Group* is then added to the proper EC2 instance.  
 
 ## Connecting to your EC2 instance with PuTTY
 
@@ -171,9 +171,27 @@ The article at this [link](https://asf.alaska.edu/how-to/data-recipes/moving-fil
 
 where your-key.ppk is your PuTTY private key file previously generated to connect to your EC2 instance.  The ppk file needs to be in the same directory with the files you are copying to the EC2 instance.
 
-You need to copy the Dockerfile, vetiver.renv.lock and plumber.R files to your EC2 instance in the ec2-user directory.
+You need to copy the Dockerfile, vetiver_renv.lock and plumber.R files to your EC2 instance in the ec2-user directory.
 
 
+## Build and run the Docker API
 
+1. Log in to (SSH) the EC2 instance and start the Docker service: ```sudo service docker start``` 
+2. Build the docker container from the Dockerfile: ```docker build -t concrete-xgb-api .```
+3. Start the API: ```docker run --rm -p 8000:8000 concrete-xgb-api```
+4. The API can then be tested by connecting to the rapiddoc Docs on your instance via a web browser:
 
+```http://yourEC2PublicDNS:8000/__docs__/```
+
+If you successfully connect to the API, you will see a page such as shown below.
+
+![Your rapiddoc API home page](ConcreteAPI_DOCS.PNG)
+
+You can click on GET and TRY to ping the status of your API.  You can test the predictive model by clicking on POST and then under REQUEST click on the Example tab.  You can then enter different values for the predictors in the format shown in the Example and then click on TRY and the outcome will show below in the Response window.  An example for the Concrete API is shown in the figure below.
+
+![Example of Concrete Strength Prediction from the rapiddoc page](ConcreteAPI_POST.PNG)
+
+## Summary
+
+In this post, I have shown how to launch an API inside a Docker Container running on an EC2 instance.  The Dockerfile and ```plumber``` API script was created using the ```vetiver``` package.  The API accesses an xgboost model to predict concrete strength from ingredients and age that was versioned and posted to an AWS S3 container as described in the previous post.  I am curious about building a Shiny app to utilize this API but this will need to wait for a future post.
 
