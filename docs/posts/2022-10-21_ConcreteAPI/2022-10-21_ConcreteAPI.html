@@ -364,7 +364,7 @@ ENTRYPOINT ["R", "-e", "pr &lt;- plumber::plumb('/opt/ml/plumber.R'); pr$run(hos
 <li>Start the API: <code>docker run --rm -p 8000:8000 concrete-xgb-api</code></li>
 <li>The API can then be tested by connecting to the rapiddoc Docs on your instance via a web browser:</li>
 </ol>
-<p><code>http://yourEC2PublicDNS:8000/__docs__/</code></p>
+<pre><code>http://yourEC2PublicDNS:8000/__docs__/</code></pre>
 <p>If you successfully connect to the API, you will see a page such as shown below.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -383,6 +383,52 @@ ENTRYPOINT ["R", "-e", "pr &lt;- plumber::plumb('/opt/ml/plumber.R'); pr$run(hos
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
 <p>In this post, I have shown how to launch an API inside a Docker Container running on an EC2 instance. The Dockerfile and <code>plumber</code> API script was created using the <code>vetiver</code> package. The API accesses an xgboost model to predict concrete strength from ingredients and age that was versioned and posted to an AWS S3 container as described in the previous post. I am curious about building a Shiny app to utilize this API but this will need to wait for a future post.</p>
+<div class="callout-tip callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Expand for Session Info
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.2.0 (2022-04-22 ucrt)
+ os       Windows 10 x64 (build 19045)
+ system   x86_64, mingw32
+ ui       RTerm
+ language (EN)
+ collate  English_United States.utf8
+ ctype    English_United States.utf8
+ tz       America/Chicago
+ date     2022-11-04
+ pandoc   2.18 @ C:/Program Files/RStudio/bin/quarto/bin/tools/ (via rmarkdown)
+ quarto   1.0.36 @ C:\\PROGRA~1\\RStudio\\bin\\quarto\\bin\\quarto.cmd
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ ! package     * version date (UTC) lib source
+ P pins        * 1.0.3   2022-09-24 [?] CRAN (R 4.2.1)
+ P sessioninfo * 1.2.2   2021-12-06 [?] CRAN (R 4.2.1)
+ P vetiver     * 0.1.8   2022-09-29 [?] CRAN (R 4.2.1)
+
+ [1] C:/Users/David Zoller/AppData/Local/Temp/RtmpWoGT29/renv-library-23ec6a0a5974
+ [2] C:/Users/David Zoller/Documents/datadavidz.github.io/renv/library/R-4.2/x86_64-w64-mingw32
+ [3] C:/Users/David Zoller/AppData/Local/Temp/RtmpWoGT29/renv-system-library
+
+ P ── Loaded and on-disk path mismatch.
+
+──────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
 
 
 </section>

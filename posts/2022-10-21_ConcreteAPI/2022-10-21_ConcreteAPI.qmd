@@ -180,8 +180,9 @@ You need to copy the Dockerfile, vetiver_renv.lock and plumber.R files to your E
 2. Build the docker container from the Dockerfile: ```docker build -t concrete-xgb-api .```
 3. Start the API: ```docker run --rm -p 8000:8000 concrete-xgb-api```
 4. The API can then be tested by connecting to the rapiddoc Docs on your instance via a web browser:
-
-```http://yourEC2PublicDNS:8000/__docs__/```
+```
+http://yourEC2PublicDNS:8000/__docs__/
+```
 
 If you successfully connect to the API, you will see a page such as shown below.
 
@@ -195,3 +196,26 @@ You can click on GET and TRY to ping the status of your API.  You can test the p
 
 In this post, I have shown how to launch an API inside a Docker Container running on an EC2 instance.  The Dockerfile and ```plumber``` API script was created using the ```vetiver``` package.  The API accesses an xgboost model to predict concrete strength from ingredients and age that was versioned and posted to an AWS S3 container as described in the previous post.  I am curious about building a Shiny app to utilize this API but this will need to wait for a future post.
 
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
