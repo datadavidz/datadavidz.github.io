@@ -1,19 +1,19 @@
 ---
 title: "About"
-image: profile.jpg
+image: matrix_head.png
 about:
   template: jolla
   links:
     - icon: twitter
       text: Twitter
-      href: https://twitter.com
+      href: https://twitter.com/datadavidz
     - icon: linkedin
       text: LinkedIn
       href: https://linkedin.com
     - icon: github
       text: Github
-      href: https://github.com
+      href: https://github.com/datadavidz
 
 ---
 
-About this blog
+My blog to share my data science projects for fun.  I am an R enthusiast and enjoy exploring all kinds of topics in the tidyverse.  Thanks for stopping by and be sure to check out the posts!
