@@ -2,15 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://datadavidz.github.io/archive.html</loc>
-    <lastmod>2022-11-04T21:17:41.729Z</lastmod>
+    <lastmod>2022-12-06T21:56:46.455Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/blog.html</loc>
-    <lastmod>2022-11-04T21:17:42.554Z</lastmod>
+    <lastmod>2022-12-06T21:56:47.292Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/index.html</loc>
-    <lastmod>2022-09-02T19:39:35.681Z</lastmod>
+    <lastmod>2022-12-06T21:45:25.182Z</lastmod>
   </url>
   <url>
     <loc>https://datadavidz.github.io/posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html</loc>
@@ -67,5 +67,9 @@
   <url>
     <loc>https://datadavidz.github.io/posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html</loc>
     <lastmod>2022-11-04T21:17:47.416Z</lastmod>
+  </url>
+  <url>
+    <loc>https://datadavidz.github.io/posts/2022-12-02_SimpleUIConcreteAPI/2022-12-02_SimpleUIConcreteAPI.html</loc>
+    <lastmod>2022-12-06T21:56:44.374Z</lastmod>
   </url>
 </urlset>

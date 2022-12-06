@@ -2,6 +2,7 @@
   {
     "listing": "/archive.html",
     "items": [
+      "/posts/2022-12-02_SimpleUIConcreteAPI/2022-12-02_SimpleUIConcreteAPI.html",
       "/posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html",
       "/posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html",
       "/posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html",
@@ -21,6 +22,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/2022-12-02_SimpleUIConcreteAPI/2022-12-02_SimpleUIConcreteAPI.html",
       "/posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html",
       "/posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html",
       "/posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html",
