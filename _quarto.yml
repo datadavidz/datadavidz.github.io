@@ -16,8 +16,7 @@ website:
         href: https://twitter.com/datadavidz
 format:
   html:
-    theme: cosmo
-    css: styles.css
+    theme: [cosmo, theme.scss]
 
 
 
