@@ -3,6 +3,11 @@ title: "Tidy Tuesday: CEO Departures"
 date: "2021-04-27"
 categories: [DataViz]
 ---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
 
 A data visualization based on a dataset of CEO departures from 1500 S&P firms from 2000-2018.
 
