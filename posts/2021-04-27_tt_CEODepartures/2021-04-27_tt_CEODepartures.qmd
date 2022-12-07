@@ -9,7 +9,7 @@ categories: [DataViz]
 renv::use(lockfile = "renv.lock")
 ```
 
-A data visualization based on a dataset of CEO departures from 1500 S&P firms from 2000-2018.
+My data visualization based on a dataset of CEO departures from 1500 S&P firms from 2000-2018.
 
 A quick analysis of the weekly [\#TidyTuesday](http://github.com/rfordatascience/tidytuesday) dataset organized by the R4DS Online Learning Community. My approach is to apply my data science skills to explore one question I have about the data and generate a visualization that addresses this question. The main purpose for me is to practice and try out new things. I am never completely satisfied with the end result but I do the best I can in a short period of time.
 
