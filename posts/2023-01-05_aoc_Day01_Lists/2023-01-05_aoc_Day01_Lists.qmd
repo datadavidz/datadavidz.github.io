@@ -1,0 +1,134 @@
+---
+title: "Advent of Code Day 1: Working with Lists"
+date: 2023-01-05
+---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
+An input file is transformed into a structured list to enable calculations on the dataset.
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 1.  The scenario is that the elves are asked to record the calories for each consumable item they've brought with them.  The list for each elf is separated by a blank line.  So, the list looks something like this:
+
+```
+1000
+2000
+3000
+
+4000
+
+5000
+6000
+
+7000
+8000
+9000
+
+10000
+```
+
+The first objective is to determine the most calories carried by a single elf.  The second objective is to determine the total calories available from the top 3 elves carrying the most calories.  There are a number of approaches to answer these questions, for example, by iterating through the data and storing just the highest (or 3 highest) totals in the process.  Thinking about real world problems, I was interested in storing the totals for each elf so you could do additional analyses such as which elves are carrying the most calories, what is the distribution of calories amongst the elves and so on.  To retain the structure of the original data set but make it more amenable for further analysis, my thought was to read the data into a list where each list item contained a sub-list of the calories for each elf.
+
+## Loading and analyzing input file
+
+The input file has the structure as described in the introduction.  The ```read_delim``` function from the ```readr``` package is used to load the file into a tibble (dataframe).
+```{r}
+#| warning: false
+#| output: false
+library(tidyverse)
+
+filepath <- here::here("./posts/data/aoc/day01_input.txt")
+
+data <- read_delim(filepath, delim = "\n", col_names = c("calories"), skip_empty_rows = FALSE)
+```
+Next, I determine the number of elves in the list by counting the number of NAs.  I need to add 1 since the items for the last elf does not end with an NA.
+
+```{r}
+num_elves <- data %>%
+  filter(is.na(calories)) %>%
+  count(calories) %>%
+  pull(n) %>%
+  `+`(1)
+
+num_elves
+```
+The data is now read into the list where each list item contains the vector of calories for that elf.  I preallocate the list and then loop through the dataframe structure.  When an NA is encountered, the list of calories for the current elf (`elf_bag`) is added to `cal_lst` at the position specified by `elf_id`, `elf_id` is iterated by 1 and `elf_bag` is reset to an empty vector.
+
+```{r}
+elf_id <- 1 #counter for the current elf
+elf_bag <- vector() #vector for the calories for each consumable item
+
+#Preallocate the list
+cal_lst <- vector(mode = "list", length = 251)
+
+for (i in 1:length(data[[1]])) {
+  if (is.na(data[[i,1]])) {
+    cal_lst[elf_id] <- list(elf_bag)
+    names(cal_lst)[elf_id] <- paste0("elf_", elf_id)
+    elf_id <- elf_id + 1
+    elf_bag <- vector()
+  } else {
+    elf_bag <- c(elf_bag, data[[i, 1]])
+  }
+}
+# Add the final list of items since no NA at the end
+cal_lst[elf_id] <- list(elf_bag)
+names(cal_lst)[elf_id] <- paste0("elf_", elf_id)
+
+#Show the first three list items
+cal_lst[1:3]
+```
+## Finding the objectives
+
+Now, it is easy to find the most calories carried by an elf using `sapply` and then sort.  Since we named the list elements, we can see that elf_186 is caring the most calories.
+```{r}
+#total calories for each elf
+cal_by_elf <- sapply(cal_lst, sum)
+sort(cal_by_elf, decreasing = TRUE)[1]
+```
+Similarly, the total amount for the top 3 elves carrying the most calories is determined.
+```{r}
+sum(sort(cal_by_elf, decreasing = TRUE)[1:3])
+```
+
+The distribution of calories carried by the elves can be visualized in a histogram.
+```{r}
+enframe(cal_by_elf) %>%
+  ggplot(aes(x=value)) +
+  geom_histogram(bins = 35, fill = "steelblue") +
+  labs(title = "Calories of consumable items carried by Santa's elves",
+       x = "calories carried")
+```
+## Summary
+
+A dataset from the Advent of Code Day 1 problem has been loaded into a structured list.  This format made performing the calculations required to meet the objectives quite straightforward.  Further analysis such as building to histogram is possible since the calculations are preserved for all of the elves.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
+
+
+
