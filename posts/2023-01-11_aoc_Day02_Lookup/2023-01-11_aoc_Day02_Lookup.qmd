@@ -1,0 +1,156 @@
+---
+title: "Advent of Code Day 2: Using Lookup Tables"
+date: 2023-01-11
+---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
+Rules are defined in lookup tables and joined to the input dataset in order to calculate a score for a Rocks-Paper-Scissors game.
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 2.  The scenario is that the elves are playing a game of rock-paper-scissors.  You have a list of what your opponent chose where A is for Rock, B is for Paper and C is for Scissors and what you have chosen where X is for Rock, Y is for Paper and Z is for Scissors.  So, the list looks something like this:
+
+```
+A X
+C Y
+B Z
+B Y
+C X
+A X
+C Z
+```
+
+You need to determine the total score for the game.  The score for each round is determined by what you chose to play (1 point for Rock, 2 points for Paper and 3 points for Scissors) and the result (0 points for a Loss, 3 points for a Draw and 6 points for a Win).  In this case, of course, Rock beats Scissor, Paper beats Rock and Scissor beats Paper.
+
+## Loading and analyzing input file
+
+The input file has the structure as described in the introduction.  The ```read_delim``` function from the ```readr``` package is used to load the file into a tibble (dataframe).
+```{r}
+#| warning: false
+#| output: false
+library(tidyverse)
+library(gt)
+
+filepath <- here::here("./posts/data/aoc/day02_input.txt")
+
+data <- read_delim(filepath, delim = "\n", col_names = c("rounds"))
+```
+
+Initially, the data is loaded into a single column as a string with two characters separated by a space (e.g. "C Y").  I would prefer to separate the opponents choice and my choice into separate columns.
+```{r}
+data <- data |> separate(rounds, into = c("opponent", "me"), sep = " ")
+
+data |> slice(1:6) |> gt()
+```
+Now, we define the scoring rules in lookup tables.  The first table is for the points depending upon what you chose to play.
+```{r}
+tt_shape <- tribble(~me, ~shape_score,
+        "X", 1,
+        "Y", 2,
+        "Z", 3)
+
+tt_shape |> gt()
+```
+Next, we define a lookup table for the round result to define whether you win (W), lose (L) or draw (D).
+```{r}
+tt_result <- tribble(~opponent, ~me, ~result,
+        "A", "X", "D",
+        "A", "Y", "W",
+        "A", "Z", "L",
+        "B", "X", "L",
+        "B", "Y", "D",
+        "B", "Z", "W",
+        "C", "X", "W",
+        "C", "Y", "L",
+        "C", "Z", "D"
+        )
+
+tt_result |> gt()
+```
+The scoring for the win, loss and draw result is then defined.
+```{r}
+tt_rscore <- tribble(~result, ~result_score,
+        "L", 0,
+        "D", 3,
+        "W", 6)
+
+tt_rscore |> gt()
+```
+## Part One: Solution
+
+The goal for Part One is to calculate the total score for the rock-paper-scissors rounds contained in the input file.  We can achieve this goal by applying the lookup tables to the input file data.  A series of left joins is applied using ```dplyr``` is applied to the dataset, the score for each round is determined and then the scores for each round are summed to determine the total score.
+
+```{r}
+data %>%
+  left_join(tt_shape, by = "me") %>%
+  left_join(tt_result, by = c("opponent", "me")) %>%
+  left_join(tt_rscore, by = "result") %>%
+  rowwise() %>%
+  mutate(round_score = shape_score + result_score) %>%
+  ungroup() %>%
+  summarize(total_score = sum(round_score))
+```
+
+## Part Two: Solution
+
+In Part Two, we find out that the second column in the dataset containing the 'X', 'Y' and 'Z's do not refer to the choice played but rather the desired result for the round.  So, we need to update the rules so that 'X' is a loss, 'Y' is a draw and 'Z' is a draw therefore a new lookup table is created as shown below.
+```{r}
+tt_update <- tribble(~me, ~result,
+        "X", "L",
+        "Y", "D",
+        "Z", "W")
+
+tt_update |> gt()
+```
+Now, we apply the rules update to determine the result and then the original tables are applied to determine the choice to play, the score for playing that choice and the score for the round result.  Similarly to Part One, each round score is then calculated and summed to determine the total score.
+```{r}
+data %>%
+  left_join(tt_update, by = "me") %>%
+  select(-me) %>%  #drop this column because the definition has changed
+  left_join(tt_result, by = c("opponent", "result")) %>% #determine the new "me" column
+  left_join(tt_shape, by = "me") %>%
+  left_join(tt_rscore, by = "result") %>%
+  rowwise() %>%
+  mutate(round_score = shape_score + result_score) %>%
+  ungroup() %>%
+  summarize(total_score = sum(round_score))
+```
+## Summary
+
+In this Advent of Code problem, lookup tables were created to represent the rules for scoring a rock-paper-scissors game in this fictitious scenario.  The advantage of using lookup tables was seen in a subsequent rules change where a minimal amount of changes were required to calculate the new score.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
+
+
+
+
+
+
+
+
+
