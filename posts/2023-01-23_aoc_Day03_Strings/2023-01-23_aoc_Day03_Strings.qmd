@@ -1,0 +1,130 @@
+---
+title: "Advent of Code Day 3: Manipulating Strings"
+date: 2023-01-23
+---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
+Lists of elf items are contained within strings which are manipulated with the ```stringr``` package to determine loading priorities.
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 3.  This time the elves need to load items into rucksacks and the list of items is represented by strings such as:
+
+```{r}
+#| warning: false
+#| output: false
+library(tidyverse)
+
+filepath <- here::here("./posts/data/aoc/day03_input.txt")
+
+data <- read_delim(filepath, delim = "\n", col_names = c("items"))
+data |> slice(1:5)
+```
+
+Each character in each string represents an item.  The first half of the items in the string go into the first compartment and the second half of the items go into the second compartment.  The item which is in both the first half and second half of the string sets the priority where:
+
+The lowercase letters from a to z have priorities 1 through 26.  
+The uppercase letters from A to Z have priorities 27 through 52.  
+
+This priority table is rather easily defined in R using the ```letters``` constant for lowercase a-z and ```LETTERS``` for uppercase A-Z.
+```{r}
+item_priority <- tibble(item_name = c(letters, LETTERS),
+                        item_prio = 1:52)
+```
+
+## Solution to Part One
+
+The goal of part one is to determine the sum of the priorities for all of the item lists.  Again, the priority is defined by the common item in the first and second half of the string.  The first step is to separate each string into two halves.  The midpoint is determined by dividing the string length by 2.  Functions from the ```stringr``` package are used to find the string length (```str_length```) and then create the sub-strings (```str_sub```).
+
+```{r}
+split_data <- data |>
+  mutate(item_len = str_length(items)) |>
+  rowwise() |>
+  mutate(items_1 = str_sub(items, 1, item_len / 2)) |>
+  mutate(items_2 = str_sub(items, (item_len / 2) + 1, item_len)) |>
+  ungroup()
+
+head(split_data)
+```
+The common item in both compartments is identified by using two more ```stringr``` package functions.  The ```str_split``` function is used to create a list of the characters in each sub-string.  The ```str_unique``` function (new to ```stringr``` 1.5.0) is used to create a list of only the unique characters in the substring.  Finally, the ```intersect``` function from ```dplyr``` is used to find the common character is both lists.
+```{r}
+common_items <- split_data |>  
+  rowwise() |>
+  mutate(split_1 = str_split(items_1, "")) |>
+  mutate(split_2 = str_split(items_2, "")) |>
+  mutate(unique_1 = list(str_unique(unlist(split_1)))) |>
+  mutate(unique_2 = list(str_unique(unlist(split_2)))) |>
+  mutate(common_item = intersect(unique_1, unique_2)) |>
+  ungroup() |>
+  select(items_1, items_2, common_item)
+
+common_items |> slice(1:6)
+```
+
+The common_items are then joined with ```item_priority``` and then the priorities are summed to find the total priority. 
+```{r}
+left_join(common_items, item_priority, by = c("common_item" = "item_name")) %>%
+  summarize(total_priority = sum(item_prio))
+```
+## Solution to Part Two
+
+In Part Two, we are informed that each elf is part of group consisting of three elves and each group has an identifying badge. Every set of three lines in the dataset represents one group and the common item among all three lines is the badge.  Priorities for the items are the same as defined in Part One where a-z is 1 to 26 and A-Z is 27 to 52.  The question is what is the sum of the priorities for the group badges.
+
+In this case, we do not need to split the strings in half but we do need to identify the unique characters in each string similar to Part One.
+```{r}
+unique_data <- data |>
+  rowwise() |>
+  mutate(items_split = str_split(items, "")) |>
+  mutate(items_unique = list(str_unique(unlist(items_split)))) |>
+  ungroup()
+
+unique_data |> slice(1:6)
+```
+
+Now we need to identify the groups by introducing a new id column, ```elf_group```, for each set of three lines.  We then ```group_by``` this new column and find the intersection between the first two lines and the result is intersected with the last line to find the common item.  The ```Reduce``` function is used to iteratively apply the function with two arguments at a time.
+
+```{r}
+badge_data <- unique_data |>
+  mutate(elf_group = rep(1:(nrow(data) %/% 3), each = 3)) |>
+  mutate(elf_group = as.factor(elf_group)) |>
+  group_by(elf_group) |>
+  summarize(badge = Reduce(intersect, items_unique), .groups = "drop")
+
+badge_data |> slice(1:6)
+```
+
+The total priority for the badge items is then calculated by joining with ```item_priority```.
+```{r}
+left_join(badge_data, item_priority, by = c("badge" = "item_name")) %>%
+  summarize(total_priority = sum(item_prio))
+```
+## Summary
+
+This Advent of Code problem provided a great opportunity to brush up on some useful ```stringr``` functions.  It was also interesting to keep all of the data transformations in tibble columns.  A nice application of the ```Reduce``` function (base R!) was used to find the common item among several strings.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
