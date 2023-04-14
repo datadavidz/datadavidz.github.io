@@ -1,0 +1,110 @@
+---
+title: "Advent of Code Day 5: "
+date: 2023-04-14
+---
+```{r}
+#| echo: false
+#| results: "hide"
+# renv::use(lockfile = "renv.lock")
+```
+Using Base R to read a custom, input file format and manipulate the data in lists
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 5. Supplies for the elves' expedition are loaded in crates which are contained in nine stacks.  Unfortunately, the order of the crates in each stack is not correct and a crane operator needs to move the crates between the stacks until all the crates are in the correct order for unloading.
+
+## Loading the input file
+
+The input file consists of two sections.  The first section contains a visual representation of the positioning of the crates in each of the nine stacks.  The second section contains the instructions for the crane operator to move crates from one stack to another.  The text for the first section is shown below.
+
+```
+[V]     [B]                     [F]
+[N] [Q] [W]                 [R] [B]
+[F] [D] [S]     [B]         [L] [P]
+[S] [J] [C]     [F] [C]     [D] [G]
+[M] [M] [H] [L] [P] [N]     [P] [V]
+[P] [L] [D] [C] [T] [Q] [R] [S] [J]
+[H] [R] [Q] [S] [V] [R] [V] [Z] [S]
+[J] [S] [N] [R] [M] [T] [G] [C] [D]
+ 1   2   3   4   5   6   7   8   9 
+```
+
+The first step is to read the first 8 lines containing the crate locations into character strings.  In this case, the length of the 8 strings are the same which makes it easier to handle.  We also define the position of the crate labels (i.e. letter) as the brackets do not add much other than helping with the visual representation.
+```{r}
+filepath <- here::here("./posts/data/aoc/day05_input.txt")
+
+boxlines <- readLines(filepath, n=8L)
+
+cpositions <- c(2, 6, 10, 14, 18, 22, 26, 30, 34)
+```
+
+Next, I defined two functions.  The first function, ```extract_chars``` extracts the letters from one of the strings at the correct positions.  The second function, ```extract_lines``` uses ```extract_chars``` to extract all of the lines and merge into one list containing all nine stack labels.
+
+```{r}
+extract_chars <- function(stringToExtract, charPositions) {
+  char_list <- list()
+  for (n in 1:length(charPositions)) {
+    char_list <- c(char_list, substring(stringToExtract, charPositions[n], charPositions[n]))
+  }
+  return(char_list)
+}
+
+extract_lines <- function(stringsToExtract, charPositions) {
+  list1 <- extract_chars(stringsToExtract[1], charPositions)
+  for (i in 2:length(stringsToExtract)) {
+    list2 <- extract_chars(stringsToExtract[i], charPositions)
+    list1 <- mapply(c, list1, list2, SIMPLIFY = FALSE)
+  }
+  return(list1)
+}
+```
+
+The lines read from the input file and the positions of the crate labels are used as the arguments for ```extract_lines``` to generate the desired list object.
+```{r}
+box_lists <- extract_lines(boxlines, cpositions)
+
+str(box_lists)
+```
+The blank spaces need to removed from the character vectors as they are not needed and would only interfere with subsequent manipulations.  A simple for loop is used for this purpose.
+
+```{r}
+for (i in 1:length(box_lists)) {
+  box_lists[[i]] <- box_lists[[i]][box_lists[[i]] != " "]
+}
+
+str(box_lists)
+```
+The ```box_lists``` object now has the crates labels for each stack in order from top to bottom.  Now, we need to read the crane operator instructions which is beneath the first section and separated by a blank line.  The script for reading the lines containing the instructions is listed below.  There is a flag, ```start_collecting``` to indicate where the second section begins (after the blank line).
+
+```{r}
+start_collecting <- 0
+box_moves <- list()
+line_number <- 0
+
+con = file(filepath, "r")
+while (TRUE) {
+  # line_number <- line_number + 1
+  oneLine = readLines(con, n = 1)
+  # print(oneLine)
+  if (length(oneLine) == 0) {
+    break
+  }
+  if (start_collecting == 0 & nchar(oneLine) == 0) {
+    start_collecting <- 1
+    # print("Started collecting")
+  }
+  if (start_collecting == 1) {
+    if (nchar(oneLine) > 0)  
+    box_moves <- c(box_moves, oneLine)
+  }
+}
+close(con)
+
+head(box_moves, 5)
+```
+The instruction explain how many crates to move and then from which stack and to which stack.  For example, the first instruction listed above indicates to move 1 crate from the top of stack 8 to the top of stack 4.
+
+
+
+
+
