@@ -7,7 +7,7 @@ date: 2023-04-14
 #| results: "hide"
 renv::use(lockfile = "renv.lock")
 ```
-Using Base R to read a custom, input file format and manipulate the data in lists
+Using base R to read a custom, input file format and manipulate the data in lists
 
 ## Introduction
 
