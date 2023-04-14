@@ -1,11 +1,11 @@
 ---
-title: "Advent of Code Day 5: "
+title: "Advent of Code Day 5: Stacking Crates"
 date: 2023-04-14
 ---
 ```{r}
 #| echo: false
 #| results: "hide"
-# renv::use(lockfile = "renv.lock")
+renv::use(lockfile = "renv.lock")
 ```
 Using Base R to read a custom, input file format and manipulate the data in lists
 
@@ -102,9 +102,81 @@ close(con)
 
 head(box_moves, 5)
 ```
-The instruction explain how many crates to move and then from which stack and to which stack.  For example, the first instruction listed above indicates to move 1 crate from the top of stack 8 to the top of stack 4.
+The instruction explain how many crates to move and then from which stack and to which stack.  For example, the first instruction listed above indicates to move 1 crate from the top of stack 8 to the top of stack 4. The instructions are parsed so that the numbers can accessed directly.
 
+```{r}
+box_moves_parsed <- sapply(box_moves, function(x) strsplit(x, split = " "))
 
+head(box_moves_parsed, 5)
+```
+## Moving the Crates
 
+Now that both sections of the input file have been loaded into R objects, the crate operator instructions can be applied.  The input file contained 504 instruction steps!  A new function is created to adjust the stack lists contained in ```box_lists``` based on the instruction step.  An important part, that I initially missed, is that for the first "9000 model" crane the crates are moved **one at a time** even when more than one crate is listed in the step.  The top crate is moved and then the subsequent crates one-by-one.  This results in the crates being moved ending up in reverse order on top of the stack they are moved to.
 
+```{r}
+apply_instruction_step <- function(current_box_lists, move_step, model = "9000") {
+  num_boxes <- as.numeric(move_step[2])
+  #print(num_boxes)
+  from_loc <- as.numeric(move_step[4])
+  #print(from_loc)
+  to_loc <- as.numeric(move_step[6])
+  #print(to_loc)
+  if (model == "9000") {
+    current_box_lists[[to_loc]] <- c(current_box_lists[[from_loc]][(num_boxes:1)], current_box_lists[[to_loc]])
+  } else {
+    current_box_lists[[to_loc]] <- c(current_box_lists[[from_loc]][(1:num_boxes)], current_box_lists[[to_loc]])
+  }
+  #print(current_box_lists[[to_loc]])
+  current_box_lists[[from_loc]] <- current_box_lists[[from_loc]][-(1:num_boxes)]
+  #print(current_box_lists[[from_loc]])
+  return(current_box_lists)
+}
+```
 
+Now, I run the function for all of the instructions.  Once all steps are completed, the top crate for each stack is identified and the puzzle answer.
+```{r}
+temp <- box_lists
+for (i in 1:length(box_moves_parsed)) {
+  temp <- apply_instruction_step(temp, box_moves_parsed[[i]], model = "9000")
+}
+
+# Show the label for the top crate for each stack
+sapply(temp, '[[', 1)
+```
+Part two of the puzzle involves an upgrade of the crane to "model 9001".  The new crane can now move multiple boxes instead of one at a time.  So, now the crates are moved in order rather than the reverse order for the "model 9000" crane.  We already have built this argument into our ```apply_instruction_step``` function.
+
+```{r}
+temp <- box_lists
+for (i in 1:length(box_moves_parsed)) {
+  temp <- apply_instruction_step(temp, box_moves_parsed[[i]], model = "9001")
+}
+
+# Show the label for the top crate for each stack
+sapply(temp, '[[', 1)
+```
+## Summary
+The Day 5 puzzle required quite a bit of thinking about how to load the input file in order to solve the puzzle.  I chose to load the data into strings for manipulation using base R commands.  Initially, I missed the difference between the model 9000 and model 9001 cranes in my first read which led to some head-scratching on why my part one solution wasn't right.  Always read the instructions thoroughly!
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
