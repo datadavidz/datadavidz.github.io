@@ -1,0 +1,109 @@
+---
+title: "Advent of Code Day 6: Decoding Signals"
+date: 2023-04-25
+---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
+
+Find a start-of-packet marker in a string of characters
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 6. You have a defective communication device that you need to fix in order to communicate with the other elves.  You must write a subroutine to identify a start-of-packet marker in the incoming datastream.
+
+## Loading the input file
+
+The input file consists of a long, string of characters (4096 characters long).  I used the ```file_read``` function from the ```readr``` package in order to read the whole file directly into a string object.  I then parsed the string by character using the ```str_split``` from the ```stringr``` package as shown below.
+
+```{r}
+library(readr)
+library(stringr)
+```
+```{r}
+filepath <- here::here("./posts/data/aoc/day06_input.txt")
+file_str <- read_file(filepath)
+
+file_split <- str_split(file_str, boundary("character"))[[1]]
+```
+
+## Finding the start-of-packet marker
+
+The goal of the first part of the puzzle is to identify the first occurrence of the start-of-packet marker.  This marker is denoted by four characters which are all different.  For example, in the string below:
+
+```
+mjqjpqmgbljsphdztnvjfqwrcgsmlb
+```
+
+The first time four different characters are detected in the sequence is after the 7th character is received and you have the sequence "jpqm".  The goal is to report the number of characters processed before this start-of-packet marker is found in the input data.  The subroutine can be written quite easily by determining the number of unique characters in the 4 character buffer as it traverses the input data string.  There are different ways to handle the first three characters.  The way it is handled below is the buffer is initiated by replicating the first character 3 times.  It could be handled in other ways such as not analyzing for uniqueness until the first four characters are loaded or initialize the buffer with the first four characters and begin the loop at the fifth character.
+
+```{r}
+marker_length <- 4
+buffer <- rep(file_split[1], marker_length-1)
+cposition <- 0
+
+for (i in 1:length(file_split)) {
+  cposition <- cposition + 1
+  if (length(unique(c(buffer, file_split[i]))) == marker_length) {
+    break
+  } else {
+    buffer <- c(buffer[2:(marker_length-1)], file_split[i])
+  }
+}
+
+cposition
+```
+In this case, ```cposition``` gives the number of characters processed before the start-of-packet marker sequence is detected.  The buffer is updated by adding the new character and checking to see if the unique characters is equal to 4.  If equal to 4, the for loop is stopped and ```cposition``` is reported.  If not equal to 4, the first (oldest) character in the buffer is removed and the loop is continued.  For my input data file, 1300 characters are processed before the start-of-packet marker is detected.
+
+## Finding the start-of-message marker
+
+The goal of the second part of the puzzle is to find the start-of-message marker which is represented by 14 distinct characters instead of the 4 distinct characters from the first part.  Detecting this marker just requires updating the value of the ```marker_length``` to 14 in the code used in part one.
+
+```{r}
+marker_length <- 14
+buffer <- rep(file_split[1], marker_length-1)
+cposition <- 0
+
+for (i in 1:length(file_split)) {
+  cposition <- cposition + 1
+  if (length(unique(c(buffer, file_split[i]))) == marker_length) {
+    break
+  } else {
+    buffer <- c(buffer[2:(marker_length-1)], file_split[i])
+  }
+}
+
+cposition
+```
+For part two, 3986 characters are processed before the start-of-message marker is detected.  Since the code is reused with only a change in the value of ```marker_length``` a function could be created with an argument to pass any marker length value.  I did not do this step here as the puzzle answers had already been determined.
+
+## Summary
+
+The Day 6 puzzle was quite straightforward especially with the use of the ```unique``` function in base R.  Functions from ```readr``` and ```stringr``` made it easy to process the input file into the desired character vector.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+
+
