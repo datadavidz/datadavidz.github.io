@@ -1,0 +1,160 @@
+---
+title: "Advent of Code Day 7: Tracking file paths"
+date: 2023-05-05
+---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
+
+Track the directory paths and file sizes from a series of OS commands
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 7. The communication device that you need to communicate with the other elves has now run out of file space.  You must determine the file size of each directory and then identify the directory to delete in order to meet the proper operating requirements.
+
+## Loading the input file
+
+The input file consists of 964 lines of operating system commands and output.  Simply using ```readLines``` function from base R does a fine job of reading each command as a string in a string vector containing all of the commands.
+
+```{r}
+library(stringr)
+library(dplyr)
+
+filepath <- here::here("./posts/data/aoc/day07_input.txt")
+commands <- readLines(filepath)
+```
+The input file structure looks similar to what is shown below.  The OS commands begin with a "$" with ```cd``` and ```ls``` commands for change directory and list files respectively.  After the ```ls``` command, the sub-directories and files are listed for the current directory with directories starting with ```dir``` and files listing the file size followed by the file name.
+
+```
+$ cd /
+$ ls
+dir a
+14848514 b.txt
+8504156 c.dat
+dir d
+$ cd a
+$ ls
+dir e
+29116 f
+2557 g
+62596 h.lst
+$ cd e
+$ ls
+584 i
+$ cd ..
+$ cd ..
+$ cd d
+$ ls
+4060174 j
+8033020 d.log
+5626152 d.ext
+7214296 k
+```
+
+## Part One: Directory sizes
+
+The first goal is to determine the size of each directory from the commands and output listed in the input file.  The directory paths can be tracked from the commands containing ```cd```.  There are three types of ```cd``` commands: 1) ```$ cd \``` to go back to the root directory, 2) ```$ cd ..``` to go back (up) one directory and 3) ```$ cd```*[dir name]*.  The ```ls``` commands can be ignored as the subsequent output can be handled directly.  The ```dir``` output can also be ignored since the directories are tracked with the ```cd``` commands.  The file size and name output must be saved to their corresponding directory path.
+
+```{r}
+path <- "root"
+# Initialize tibble to store the file info
+filedf <- tibble(dirpath = character(), filesize = character(), filename = character())
+
+for (command in commands) {
+  # Split each command into a string vector
+  comm_spl <- str_split(command, pattern = " ", simplify = TRUE)
+  
+  if (comm_spl[[1]] == "$") {
+    
+    if (comm_spl[[2]] == "ls") {
+      # do nothing
+    } else {
+      # Otherwise it is a cd command so update the path
+      if (comm_spl[[3]] == "/") {
+        path <- path[1]
+      } else if (comm_spl[[3]] == "..") {
+        path <- path[1:length(path)-1]
+      } else {
+        path <- c(path, comm_spl[[3]])
+      }
+    }
+  } else if (comm_spl[[1]] == "dir") {
+    # do nothing
+  } else  {
+    # Otherwise it is a number and a file name
+    # For loop to save the file size for current directory and all parent directories
+    for (i in 1:length(path)) {
+      filedf <- bind_rows(filedf, tibble(dirpath = paste(path[1:i], collapse = "/"), filesize = comm_spl[[1]], filename = comm_spl[[2]]))
+    }
+  }
+}
+```
+
+The ```filedf``` tibble now contains a row for each file in each directory (including files in the sub-directories of the directory).  The total directory size can now be determined by grouping on the directory path and using the ```dplyr``` summarize function.
+
+```{r}
+dirsizes <- filedf |>
+  mutate(filesize = as.numeric(filesize)) |>
+  group_by(dirpath) |> 
+  summarize(total = sum(filesize), .groups = "drop")
+
+head(dirsizes)
+```
+
+Now, we need to find the total size for all directories with size less than or equal to 100000.  This total is found rather easily by filtering and summarizing using the corresponding functions from the ```dplyr``` package as shown below. 
+```{r}
+dirsizes |>
+  filter(total <= 100000) |>
+  summarize(sum(total))
+```
+## Part Two: Select a directory to delete
+
+The communication device file system has a total capacity of 70000000.  In order to run an update, we need at least 30000000 free space on the device.  As shown from Part One above, the root directory size is 42805968.  We need to delete a directory with a size of at least 2805968 to free up enough space.
+```{r}
+max_size <- 70000000
+free_size <- 30000000
+unused_size <- max_size - dirsizes[[1, "total"]]  #max_size - root dir size
+delete_size <- free_size - unused_size
+
+delete_size
+```
+The directory closest to this size but not under was found from the ```dirsizes``` tibble.  The difference between the dir size and the delete size is determined for each directory, the differences below 0 are filtered out and the tibble is arranged so the least difference is at the top.
+
+```{r}
+dirsizes |>
+  mutate(distance = total - delete_size) |>
+  filter(distance >= 0) |>
+  arrange(distance) |>
+  slice(1)
+```
+The question for Part Two was to enter the total size for this directory.
+
+## Summary
+
+The Day 7 puzzle was solved easily once the means for tracking the filepaths was found.  Storing all of the files in a tibble made it straightforward to find the answers using ```dplyr``` functions to group and summarize the directories appropriately.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
