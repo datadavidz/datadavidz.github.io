@@ -105,5 +105,5 @@ pkg_sesh$platform$quarto <- paste(
 # print it out
 pkg_sesh
 ```
-
+:::
 
