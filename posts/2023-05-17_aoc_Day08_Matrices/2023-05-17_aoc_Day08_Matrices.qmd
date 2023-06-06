@@ -1,0 +1,256 @@
+---
+title: "Advent of Code Day 8: Matrices"
+date: 2023-05-17
+---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
+
+Assessing a grid of trees by performing positional calculations on a representative matrix
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 8. The elves are searching for an ideal location for their treehouse.  The trees are planted in a grid and the elves have created a map of the tree heights assessed from their quadcopter.
+
+## Loading the input file
+
+The input file consists of 99 rows each containing 99 numeric digits.  Simply using ```readLines``` function from base R does a fine job of reading each row into a string however, ultimately, we would like to convert the data into a matrix.  The next step is to convert each row (string) into a character vector using the ```str_split_1``` function from the ```stringr``` package and at the same time convert the characters into numeric values.  These numeric values are stored in one, long, numeric vector.  The numeric vector is then shaped into a matrix with 99 rows and 99 columns as shown below.
+
+```{r}
+library(stringr)
+
+filepath <- here::here("./posts/data/aoc/day08_input.txt")
+raw_data <- readLines(filepath)
+
+#convert each line into one long numeric vector
+raw_trees <- numeric()
+
+for (i in 1:length(raw_data)) {
+  raw_trees <- c(raw_trees, as.numeric(str_split_1(raw_data[i], "")))
+}
+
+#convert numeric vector to a matrix
+trees <- matrix(raw_trees, nrow = 99, ncol = 99, byrow = TRUE)
+```
+
+## Part One: Visibility
+
+The goal of part one is to determine the number of trees which are visible from outside the grid.  All of the trees on the outside edge of the grid are visible.  For the rest of the trees, the tree is visible if all the trees between it and the edge of the grid are shorter than it.  Only the tree in the same row or column are considered when determining if the tree is visible.  If the tree is visible from any direction (i.e. top, bottom, left or right) then it is considered visible.  As an example, a smaller grid is shown below.
+
+```
+30373
+25512
+65332
+33549
+35390
+```
+
+All of the trees on the outside edge are visible leaving just the inner nine trees to determine.  The top-left 5 is visible from the top and left but not from the bottom or right due to trees of same height blocking visibility.  The top-right 1 is invisible from all directions since all of the trees around it are taller.
+
+A ```check_visibility``` function has been created to check the visibility from each direction and return TRUE if it is visible from any direction.
+
+```{r}
+# assumes a 99 x99 tree matrix
+check_visibility <- function(tree_mat, row_pos, col_pos){
+  if (row_pos == 1 | row_pos == 99 | col_pos == 1 | col_pos == 99) {
+    visibility <- TRUE
+  } else {
+    tree_height <- tree_mat[row_pos, col_pos]
+    north_vis <- tree_height > max(tree_mat[1:(row_pos-1), col_pos])
+    south_vis <- tree_height > max(tree_mat[(row_pos+1):99, col_pos])
+    west_vis <- tree_height > max(tree_mat[row_pos, 1:(col_pos-1)])
+    east_vis <- tree_height > max(tree_mat[row_pos, (col_pos+1):99])
+    
+    visibility <- north_vis | south_vis | west_vis | east_vis
+  }
+  
+    return(visibility)
+}
+```
+
+All of the trees are then checked using for loops to cycle through all of the tree locations.  The results are stored in a matrix which is initialized with -1 values.
+
+```{r}
+vis_mat <- matrix(rep(-1, 99*99), nrow = 99, ncol = 99)
+
+for (i in 1:99) {
+  for (j in 1:99) {
+    vis_mat[i, j] <- check_visibility(trees, i, j)
+  }
+}
+```
+
+The total number of trees from outside the grid is determined by a sum of the resulting matrix since TRUE is captured as 1 and FALSE as 0.
+
+```{r}
+sum(vis_mat)
+```
+
+## Part Two: Tree Cover
+
+The elves are now looking for the best place to build their tree house and they like to see a lot of trees.  The number of trees visible in each direction from the prospective tree house location is determined by the number of trees before reaching a tree of same height or taller as the tree at this location.  Trees that are taller at more distant locations are not counted since the tree house has large eaves which prevent viewing them.  Tree house locations on the perimeter will have see 0 trees in at least one direction.
+
+The total **scenic score** is obtained by multiplying together the number of trees counted in each direction.  For the example given below:
+
+```
+30373
+25512
+65332
+33549
+35390
+```
+
+The 5 in the middle of the fourth row can see 2 trees to the north, 2 trees to the west, 1 tree to the south and 2 trees to the east.  So, the total scenic score is 2 * 2 * 1 * 2 which equals 8.
+
+Four functions are created to count the number of trees viewed from each direction.  These functions could be perhaps more efficiently put into a single function but I preferred the simplicity over brevity in this case.
+
+```{r}
+look_north <- function(tree_mat, row_pos, col_pos) {
+  
+  num_trees <- 0
+  if (row_pos == 1) {
+    #num_trees <- 0
+  } else {
+    tree_height <- tree_mat[row_pos, col_pos]
+    for (i in (row_pos-1):1) {
+      if (tree_mat[i, col_pos] >= tree_height){
+        num_trees <- num_trees + 1
+        break
+      } else {
+        num_trees <- num_trees + 1
+      }
+    }
+  }
+  return(num_trees)
+}
+```
+
+```{r}
+look_south <- function(tree_mat, row_pos, col_pos) {
+  
+  num_trees <- 0
+  if (row_pos == 99) {
+    #num_trees <- 0
+  } else {
+    tree_height <- tree_mat[row_pos, col_pos]
+    for (i in (row_pos+1):99) {
+      if (tree_mat[i, col_pos] >= tree_height){
+        num_trees <- num_trees + 1
+        break
+      } else {
+        num_trees <- num_trees + 1
+      }
+    }
+  }
+  return(num_trees)
+}
+```
+
+```{r}
+look_west <- function(tree_mat, row_pos, col_pos) {
+  
+  num_trees <- 0
+  if (col_pos == 99) {
+    #num_trees <- 0
+  } else {
+    tree_height <- tree_mat[row_pos, col_pos]
+    for (i in (col_pos+1):99) {
+      if (tree_mat[row_pos, i] >= tree_height){
+        num_trees <- num_trees + 1
+        break
+      } else {
+        num_trees <- num_trees + 1
+      }
+    }
+  }
+  return(num_trees)
+}
+```
+
+```{r}
+look_east <- function(tree_mat, row_pos, col_pos) {
+  
+  num_trees <- 0
+  if (col_pos == 1) {
+    #num_trees <- 0
+  } else {
+    tree_height <- tree_mat[row_pos, col_pos]
+    for (i in (col_pos-1):1) {
+      if (tree_mat[row_pos, i] >= tree_height){
+        num_trees <- num_trees + 1
+        break
+      } else {
+        num_trees <- num_trees + 1
+      }
+    }
+  }
+  return(num_trees)
+}
+```
+
+Each function returns the number of trees viewed.  The scenic score is calculated using the ```count_trees``` function which utilizes the four functions previously mentioned.
+
+```{r}
+count_trees <- function(tree_mat, row_pos, col_pos){
+  scenic_score <- 
+    look_north(trees, row_pos, col_pos) *
+    look_south(trees, row_pos, col_pos) *
+    look_west(trees, row_pos, col_pos) *
+    look_east(trees, row_pos, col_pos)
+  
+  return(scenic_score)
+}
+```
+
+The scenic scores are determined by cycling through all of the possible tree house locations.  A matrix initialized with -1 values is used again to store all of the scenic scores.
+
+```{r}
+scenic_mat <- matrix(rep(-1, 99*99), nrow = 99, ncol = 99)
+
+for (i in 1:99) {
+  for (j in 1:99) {
+    scenic_mat[i, j] <- count_trees(trees, i, j)
+  }
+}
+```
+
+The highest scenic score is obtained by searching for the maximum of the matrix.
+```{r}
+max(scenic_mat)
+```
+
+As a bonus, the location for the maximum scenic score can be obtained as shown below.
+
+```{r}
+which(scenic_mat == max(scenic_mat), arr.ind = TRUE)
+```
+## Summary
+
+Loading the data into an R matrix enabled straightforward calculations to answer the Day 8 puzzle.  Breaking the calculation into simple functions resulted in very readable and understandable code.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
+
