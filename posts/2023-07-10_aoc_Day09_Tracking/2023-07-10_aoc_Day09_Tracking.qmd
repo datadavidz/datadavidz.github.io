@@ -1,0 +1,255 @@
+---
+title: "Advent of Code Day 9: Tracking"
+date: 2023-07-10
+---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
+
+Creating a map to track a "head" knot as it moves according to a series of instructions
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 9. You need to cross a rope bridge and figure out where to step.  There are knots indicating the head and tail of the rope.  The head and tail knots must be touching (adjacent) at all times.  Based on the movement of the head knot you need to figure out all of the positions occupied by the tail knot.
+
+## Loading the input file
+
+The input file contains instructions for the movement of the head knot.  Each line consists of a letter followed by a space and a number.  The letters are either U, D, L or R corresponding to up, down, left and right.  The number is how many steps in that direction the head knot is supposed to move.  Another case where ```readLines``` works perfectly fine to read the input file into a character vector.
+
+```{r}
+library(stringr)
+
+filepath <- here::here("./posts/data/aoc/day09_input.txt")
+commands <- readLines(filepath)
+```
+
+## Part One: Tracking the head and tail knots
+
+The first goal is to track the movement of the head knot and update the position of the tail knot so that it stays adjacent to the head.  It is rather involved to explain all of the scenarios.  In general, the tail will move whenever the head is more than 2 steps away in any one direction.  In some cases, a diagonal move is required when it is more than 2 steps away in one direction and another 1 step away in a different direction.  I started by figuring out the minimum and maximum movement in both the vertical and horizontal directions in order to create a map (matrix) of the correct size to track the movements.  These min and max values are determined by the following code:
+
+```{r}
+pos_x <- 0
+pos_y <- 0
+max_x <- 0
+min_x <- 0
+max_y <- 0
+min_y <- 0
+
+for (command in commands) {
+  move <- unlist(str_split(command, " "))
+  if (move[1] == "D") {
+    pos_y <- pos_y + as.numeric(move[2])
+    if (pos_y > max_y) max_y <- pos_y 
+  } else if (move[1] == "U") {
+    pos_y <- pos_y - as.numeric(move[2])
+    if (pos_y < min_y) min_y <- pos_y
+  } else if (move[1] == "R") {
+    pos_x <- pos_x + as.numeric(move[2])
+    if (pos_x > max_x) max_x <- pos_x
+  } else if (move[1] == "L") {
+    pos_x <- pos_x - as.numeric(move[2])
+    if (pos_x < min_x) min_x <- pos_x
+  } else {}
+}
+
+print(paste0("min_x = ", min_x, "   max_x = ", max_x))
+print(paste0("min_y = ", min_y, "   min_y = ", max_y))
+```
+As can be seen from the min and max values, there is more movement to the left and up (i.e. "negative" directions) than to the right and down (i.e. "positive" directions).  We use these values then to pre-allocate a matrix that will serve as a map for the tail locations.  We initiate all of the matrix values to zero and will change to a one when the tail knot occupies that location.
+
+```{r}
+num_cols <- max_x - min_x + 1
+num_rows <- max_y - min_y + 1
+
+rope_loc <- matrix(rep(0, num_rows * num_cols), nrow = num_rows, ncol = num_cols)
+```
+
+A function called ```move_tail``` is created to update the tail knot position relative to the head knot movement.  The current head and tail locations are passed to the function which then checks if the tail knot is 2 or more steps away from the tail in any direction.  If so, the tail location is moved one step in that direction also checking whether a diagonal move is needed.  The function then returns the new tail knot location.
+
+```{r}
+move_tail <- function(head_x, head_y, tail_x, tail_y) {
+  if ((head_x - tail_x) > 1) {
+    tail_x <- tail_x + 1
+    if ((head_y - tail_y) > 0) tail_y <- tail_y + 1
+    if ((head_y - tail_y) < 0) tail_y <- tail_y - 1
+  } else if ((head_x - tail_x) < -1) {
+    tail_x <- tail_x - 1
+    if ((head_y - tail_y) > 0) tail_y <- tail_y + 1
+    if ((head_y - tail_y) < 0) tail_y <- tail_y - 1
+  } else if ((head_y - tail_y) > 1) {
+    tail_y <- tail_y + 1
+    if ((head_x - tail_x) > 0) tail_x <- tail_x + 1
+    if ((head_x - tail_x) < 0) tail_x <- tail_x - 1
+  } else if ((head_y - tail_y) < -1) {
+    tail_y <- tail_y - 1
+    if ((head_x - tail_x) > 0) tail_x <- tail_x + 1
+    if ((head_x - tail_x) < 0) tail_x <- tail_x - 1
+  } else {}
+  return(c(tail_x, tail_y))
+}
+```
+
+Next, we initiate the starting position for the overlapping head and tail knots within the ```rope_loc``` matrix and assign 1 to that position.  A 1 value will indicate a position that the tail knot occupied.
+
+```{r}
+#Starting point to stay within the map
+hpos_x <- -min_x + 1
+hpos_y <- -min_y + 1
+tpos_x <- -min_x + 1
+tpos_y <- -min_y + 1
+
+rope_loc[tpos_y, tpos_x] <- 1
+```
+
+Now, we iterate through the commands provided to move the head knot.  The order of actions is to 1) move the head knot location,  2) find the updated tail knot location using the ```move_tail``` function, 3) save the updated tail knot location and 4) set the matrix location for the tail knot to 1.
+
+```{r}
+for (command in commands) {
+  move <- unlist(str_split(command, " "))
+  if (move[1] == "D") {
+    for (i in 1:(as.numeric(move[2]))) {
+      hpos_y <- hpos_y + 1
+      tail_pos <- move_tail(hpos_x, hpos_y, tpos_x, tpos_y)
+      tpos_x <- tail_pos[1]
+      tpos_y <- tail_pos[2]
+      rope_loc [tpos_y, tpos_x] <- 1
+    } 
+  } else if (move[1] == "U") {
+    for (i in 1:(as.numeric(move[2]))) {
+      hpos_y <- hpos_y - 1
+      tail_pos <- move_tail(hpos_x, hpos_y, tpos_x, tpos_y)
+      tpos_x <- tail_pos[1]
+      tpos_y <- tail_pos[2]
+      rope_loc [tpos_y, tpos_x] <- 1
+    }
+  } else if (move[1] == "R") {
+    for (i in 1:(as.numeric(move[2]))) {
+      hpos_x <- hpos_x + 1
+      tail_pos <- move_tail(hpos_x, hpos_y, tpos_x, tpos_y)
+      tpos_x <- tail_pos[1]
+      tpos_y <- tail_pos[2]
+      rope_loc [tpos_y, tpos_x] <- 1
+    }
+  } else if (move[1] == "L") {
+    for (i in 1:(as.numeric(move[2]))) {
+      hpos_x <- hpos_x - 1
+      tail_pos <- move_tail(hpos_x, hpos_y, tpos_x, tpos_y)
+      tpos_x <- tail_pos[1]
+      tpos_y <- tail_pos[2]
+      rope_loc [tpos_y, tpos_x] <- 1
+    }
+  } else {}
+}
+```
+
+The good part about setting up the mapping of the tail knot location using a matrix of ones is that it is easy to answer the part one question: "How many places does the tail knot visit at least once?"  To calculate the answer, you simply need to find the sum of the matrix.
+
+```{r}
+sum(rope_loc)
+```
+
+## Part Two: Rope with 10 knots
+
+In Part Two, the rope now has 10 knots instead of just two.  In this case, the position for each knot is updated based on the movement of the knot before it.  As for Part One, the commands provided in the input file instruct the movement of the head knot only and we are only interested in tracking the position of the tail knot (i.e. knot 10).  Several parts can be reused from Part One.  The matrix size is the same but it needs to be initialized back to zeros.
+
+```{r}
+#Re-initialize the map
+num_cols <- max_x - min_x + 1
+num_rows <- max_y - min_y + 1 
+
+rope_loc <- matrix(rep(0, num_rows * num_cols), nrow = num_rows, ncol = num_cols)
+```
+
+The position of all 10 knots is now stored in a list and all knots are initialized to the same starting position.  The starting position is also set to 1 in ```rope_loc```.
+
+```{r}
+tpos <- replicate(10, list(c(-min_x+1, -min_y+1)))
+
+rope_loc[tpos[[10]][2], tpos[[10]][1]] <- 1
+```
+
+
+The ```move_tail``` function does not need to be changed.  We do need to cycle through all of the knots with each step using a for loop and the  ```move_tail``` function.  Only the location of knot 10 is used to update the map by setting its location to a value of 1 in ```rope_loc```.  The script below is used to cycle through the commands and update the tail knot location.
+
+```{r}
+for (command in commands) {
+  move <- unlist(str_split(command, " "))
+  if (move[1] == "D") {
+    for (i in 1:(as.numeric(move[2]))) {
+      tpos[[1]][2] <- tpos[[1]][2] + 1
+      for (j in 2:10) {
+        tail_pos <- move_tail(tpos[[j-1]][1], tpos[[j-1]][2], tpos[[j]][1], tpos[[j]][2])
+        tpos[[j]][1] <- tail_pos[1]
+        tpos[[j]][2] <- tail_pos[2]
+      }
+      rope_loc[tpos[[10]][2], tpos[[10]][1]] <- 1
+    } 
+  } else if (move[1] == "U") {
+    for (i in 1:(as.numeric(move[2]))) {
+      tpos[[1]][2] <- tpos[[1]][2] - 1
+      for (j in 2:10) {
+        tail_pos <- move_tail(tpos[[j-1]][1], tpos[[j-1]][2], tpos[[j]][1], tpos[[j]][2])
+        tpos[[j]][1] <- tail_pos[1]
+        tpos[[j]][2] <- tail_pos[2]
+      }
+      rope_loc[tpos[[10]][2], tpos[[10]][1]] <- 1
+    }
+  } else if (move[1] == "R") {
+    for (i in 1:(as.numeric(move[2]))) {
+      tpos[[1]][1] <- tpos[[1]][1] + 1
+      for (j in 2:10) {
+        tail_pos <- move_tail(tpos[[j-1]][1], tpos[[j-1]][2], tpos[[j]][1], tpos[[j]][2])
+        tpos[[j]][1] <- tail_pos[1]
+        tpos[[j]][2] <- tail_pos[2]
+      }
+      rope_loc[tpos[[10]][2], tpos[[10]][1]] <- 1
+    }
+  } else if (move[1] == "L") {
+    for (i in 1:(as.numeric(move[2]))) {
+      tpos[[1]][1] <- tpos[[1]][1] - 1
+      for (j in 2:10) {
+        tail_pos <- move_tail(tpos[[j-1]][1], tpos[[j-1]][2], tpos[[j]][1], tpos[[j]][2])
+        tpos[[j]][1] <- tail_pos[1]
+        tpos[[j]][2] <- tail_pos[2]
+      }
+      rope_loc[tpos[[10]][2], tpos[[10]][1]] <- 1
+    }
+  } else {}
+}
+```
+
+In the same way as Part One, we only need to find the sum of ```rope_loc``` in order to calculate the number of positions the tail knot has occupied at least once.
+
+```{r}
+sum(rope_loc)
+```
+## Summary
+
+This problem was easy to solve once the logic for updating the tail knot movement was coded.  It was important to identify what each direction meant as far as the matrix ("map") was concerned.  In this case, I decided an "UP" move was actually moving down in row number which was a bit tricky to wrap my head around.  Finding the size of the matrix in advance was also used but perhaps there is a way to automatically adjust the size as you read more commands while maintaining the efficiency and readability.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
+
