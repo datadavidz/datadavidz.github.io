@@ -1,0 +1,148 @@
+---
+title: "Advent of Code Day 10: Hidden Message"
+date: 2023-07-18
+---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
+
+Following a series of instructions to display a hidden series of letters
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 10.  The communication device fell into the river and got damaged.  The device consists of a CPU which processes a series of instructions according to a fixed cycle rate.  The instructions are used to set a single register "X".  A CRT display is controlled by the CPU to light certain pixels depending upon the current cycle and the register X.
+
+## Loading the input file
+
+The input file contains instructions for the CPU to set the register X.  There are only two types of instructions, noop and addx.  The "noop" instruction takes one cycle to execute and has no other effect.  The "addx V" instruction takes two cycle to execute and adds the value "V" to register X at the end of the second cycle.
+
+```{r}
+library(stringr)
+library(purrr)
+
+filepath <- here::here("./posts/data/aoc/day10_input.txt")
+commands <- readLines(filepath)
+
+head(commands)
+```
+## Part One: CPU Instructions
+
+The instructions from the input file are executed as described above.  A key point is that the update to the X register value does not occur until after the end of the cycle.  The question for Part One is to find the signal strength **during** each cycle and record the signal strength for the 20th cycle and every 40 cycles after that (i.e. 60th, 100th, 140th, 180th and 220th cycles). Signal strength is calculated by multiplying the current cycle by the X register.
+
+```{r}
+#X Register
+reg_X <- 1
+#Cycle
+i <- 1
+#Signal Strength
+sig_str <- list()
+
+for (command in commands) {
+  move <- unlist(str_split(command, " "))
+  if (move[1] == "noop") {
+    #sig_str <- c(sig_str, list(c(command, i, reg_X, i * reg_X)))
+    sig_str <- c(sig_str, list(i * reg_X))
+    i <- i + 1
+
+  } else if (move[1] == "addx") {
+    #sig_str <- c(sig_str, list(c(command, i, reg_X, i * reg_X)))
+    sig_str <- c(sig_str, list(i * reg_X))    
+    i <- i + 1
+
+    
+    #sig_str <- c(sig_str, list(c(command, i, reg_X, i * reg_X)))
+    sig_str <- c(sig_str, list(i * reg_X))
+    reg_X <- reg_X + as.numeric(move[2])
+    i <- i + 1
+
+  } else {}
+}
+```
+
+The ```walk``` function from the ```purrr``` package can be used to print the signal strength for each of the cycles of interest.
+```{r}
+cycle <- c(20, 60, 100, 140, 180, 220)
+
+cycle |> walk(function(cycle) print(paste("Signal Strength for Cycle", cycle, "is", sig_str[[cycle]])))
+```
+The answer to Part One is to add the signal strengths for the cycles of interest.
+```{r}
+sum(unlist(sig_str[cycle]))
+```
+## Part Two: CRT Display
+
+It has become evident that the X Register controls the position of a sprite on a CRT screen.  The sprite is 3 pixels wide and the X register sets the middle position of the sprite.  The CRT screen is 40 pixels wide and has 6 rows.  The left most pixel in each row is in position 0 and the right most pixel is at position 39.  A pixel is lit with each clock cycle of the CPU.  The pixel is light (#) if the sprite overlaps with the current clock cycle and dark (.) if the sprite does not overlap.
+
+The logic to determine whether the sprite is overlapping with the current cycle requires two operations: 1) subtract 1 from the current cycle since cycle 1 would correspond with sprite position 0 and 2) perform modulo 40 operation since each row of the CRT contains the same positioning relative to the sprite.
+
+```{r}
+reg_X <- 1
+i <- 1
+sprite <- (reg_X-1):(reg_X+1)
+sig_str <- list()
+crt <- character()
+
+for (command in commands) {
+  move <- unlist(str_split(command, " "))
+  if (move[1] == "noop") {
+    #sig_str <- c(sig_str, list(c(command, i, reg_X, i * reg_X)))
+    crt <- c(crt, ifelse(((i-1) %% 40) %in% sprite, "#", "."))
+    sig_str <- c(sig_str, list(i * reg_X))
+    i <- i + 1
+
+  } else if (move[1] == "addx") {
+    #sig_str <- c(sig_str, list(c(command, i, reg_X, i * reg_X)))
+    crt <- c(crt, ifelse(((i-1) %% 40) %in% sprite, "#", "."))
+    sig_str <- c(sig_str, list(i * reg_X))    
+    i <- i + 1
+
+    #sig_str <- c(sig_str, list(c(command, i, reg_X, i * reg_X)))
+    crt <- c(crt, ifelse(((i-1) %% 40) %in% sprite, "#", "."))
+    sig_str <- c(sig_str, list(i * reg_X))
+    reg_X <- reg_X + as.numeric(move[2])
+    sprite <- (reg_X-1):(reg_X+1)
+    i <- i + 1
+
+  } else {}
+}
+```
+
+The CRT can then be viewed by converting the character array to a matrix with the size dimensions of the screen.  A simple print command without the quotes allows for the letters to be displayed.
+```{r}
+view_crt <- matrix(crt, nrow = 6, ncol = 40, byrow = TRUE)
+print(view_crt, quote = FALSE)
+```
+The eight, hidden letters are revealed to be: "R F K Z C P E F".
+
+## Summary
+The trickiest part of this day's problem was figuring out whether the X register was updated **during** the cycle or after the cycle.  Using the test data and solution, I was able to determine that it was not updated during the cycle.  The other part that was a bit annoying was the CRT where the first pixel was at position 0.  Must have been a Python user who wrote this problem.  Once the problem was understood, the solution was straightforward to implement in R.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
+
+
+
+
