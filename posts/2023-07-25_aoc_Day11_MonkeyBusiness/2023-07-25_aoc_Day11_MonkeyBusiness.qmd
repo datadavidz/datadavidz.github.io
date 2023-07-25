@@ -1,0 +1,251 @@
+---
+title: "Advent of Code Day 11: Monkey Business"
+date: 2023-07-25
+---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
+
+Monkeys have taken my items and we need to determine how much monkey business is going on.
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 11.  Apparently, monkeys have taken my items and are passing them around between the monkeys.  The items are labeled with a value for how worried I am about each items.  This "worry level" changes as a monkey inspects the item by an Operation.  The monkey then uses a Test to decide what to do with the item based on the new worry level.  If the result of the Test is true, the monkey throws it one monkey and, if the Test result is false, the monkey throws it to a different monkey.  A round of "monkey business" requires cycling through each monkey and each item.  We need to find the status of the items after a specific number of rounds.
+
+## Loading the input file
+
+The input file is in a custom format and certainly not a tidy format.  I used the ```read_lines``` function from the ```readr``` package to read the lines into an array of strings and taking advantage of the option to not read in the blank lines.  The ```str_trim``` function from the ```stringr``` package is used to trim the leading and trailing whitespace from the character strings.
+
+```{r}
+#| warning: false
+library(readr)
+library(stringr)
+
+
+filepath <- here::here("./posts/data/aoc/day11_input.txt")
+
+commands <- read_lines(filepath, skip_empty_rows = TRUE)
+commands <- str_trim(commands)
+commands
+```
+I decided to parse the information needed to determine the monkey business into a list called ```monkey_ops``` which contains a sub-list for each monkey.  The needed information was the monkey's name, items, operation, test and monkey to throw to if test is true and if test is false.  The operation is divided into the operator (e.g. "+", "\*") and operator value.  One of the operations is captured as "old \* old" which was substituted with the "\^" operator and an operator value of 2.
+
+```{r}
+current_monkey <- 0
+monkey_ops <- list()
+
+#temp <- unlist(str_split(commands[4], ":"))
+
+for (i in 1:length(commands)) {
+
+  temp <- unlist(str_split(commands[i], ":"))
+  
+  if (str_detect(temp[1],"^Monkey")) {
+    current_monkey <- as.numeric(unlist(str_split(temp[1], " "))[2]) + 1
+    monkey_ops[[current_monkey]] <- list(name = current_monkey-1, inspections = 0)
+  }
+  
+  if (str_detect(temp[1], "^Starting")) {
+    current_items <- as.numeric(unlist(str_split(temp[2], ", ")))
+    monkey_ops[[current_monkey]] <- c(monkey_ops[[current_monkey]], items = list(current_items))
+  }
+  
+  if (str_detect(temp[1], "^Operation")) {
+    
+    if (unlist(str_split(temp[2], " "))[6] == "old") {
+      current_opaction <- "^"
+      current_opvalue <- 2
+    } else {
+      current_opaction <- unlist(str_split(temp[2], " "))[5]
+      current_opvalue <- as.numeric(unlist(str_split(temp[2], " "))[6])
+    }
+    
+    monkey_ops[[current_monkey]] <- c(monkey_ops[[current_monkey]], opaction = current_opaction, opvalue = current_opvalue)
+  }
+  
+  if (str_detect(temp[1],"^Test")) {
+    current_test <- as.numeric(unlist(str_split(temp[2], " "))[4])
+    monkey_ops[[current_monkey]] <- c(monkey_ops[[current_monkey]], test = current_test)
+  }
+  
+  if (str_detect(temp[1], "^If true")) {
+    current_iftrue <- as.numeric(unlist(str_split(temp[2], " "))[5])
+    monkey_ops[[current_monkey]] <- c(monkey_ops[[current_monkey]], iftrue = current_iftrue)
+  }
+  
+  if (str_detect(temp[1], "^If false")) {
+    current_iffalse <- as.numeric(unlist(str_split(temp[2], " "))[5])
+    monkey_ops[[current_monkey]] <- c(monkey_ops[[current_monkey]], iffalse = current_iffalse)
+  }
+}
+
+monkey_ops[[1]]
+```
+
+## Part One: 20 Rounds with Bounded Worry Level
+
+In the first part, monkey business is tracked for 20 rounds.  After each inspection, the worry level is divided by 3 and rounded down to the nearest integer.  This division by three and only going 20 rounds keeps the worry level from becoming extremely large numbers.  First, we create a function to calculate the worry level.
+```{r}
+calc_worry <- function(worry_init, operation, value) {
+  if (operation == "^") worry <- worry_init^value
+  else if (operation == "+") worry <- worry_init + value
+  else if (operation == "*") worry <- worry_init * value
+
+  return(floor(worry / 3))
+}
+```
+
+Next, we create a function to perform an entire round of monkey business.  The number of item inspections for each monkey is also needed to answer the Part One question.  The Test asks if the worry level is divisible by a certain number which is accomplished by using the modulo operator.  If the worry level modulo Test number is 0, the test is true otherwise it is false.
+```{r}
+perform_round <- function(monkey_ops) {
+  for (i in 1:length(monkey_ops)) {
+  
+    if (length(monkey_ops[[i]]$items) > 0) {
+  
+      for (j in 1:length(monkey_ops[[i]]$items)) {
+        
+        worry_level <- calc_worry(monkey_ops[[i]]$items[1], monkey_ops[[i]]$opaction, monkey_ops[[i]]$opvalue)
+        monkey_ops[[i]]$inspections <- monkey_ops[[i]]$inspections + 1
+
+        if ((worry_level %% monkey_ops[[i]]$test) == 0) {
+          monkey_ops[[monkey_ops[[i]]$iftrue+1]]$items <- c(monkey_ops[[monkey_ops[[i]]$iftrue+1]]$items, worry_level)
+        } else {
+          monkey_ops[[monkey_ops[[i]]$iffalse+1]]$items <- c(monkey_ops[[monkey_ops[[i]]$iffalse+1]]$items, worry_level)
+        }
+        
+        monkey_ops[[i]]$items <- monkey_ops[[i]]$items[-1]
+      }
+    }
+  }
+  return(monkey_ops)
+}
+```
+
+Now, we perform the 20 rounds.
+```{r}
+monkey_round <- monkey_ops
+
+for (k in 1:20) {
+  monkey_round <- perform_round(monkey_round)
+}
+```
+
+Another function is created to calculate the monkey business which is defined as the number of inspections by the monkeys with the top 2 highest number of inspections and multiplying those 2 numbers together.
+```{r}
+calc_monkey_business <- function(monkey_final) {
+  first <- 0
+  second <- 0
+  
+  for (i in 1:length(monkey_final)) {
+    if (monkey_final[[i]]$inspections > first) {
+      second <- first
+      first <- monkey_final[[i]]$inspections
+    } else if (monkey_final[[i]]$inspections > second) {
+      second <- monkey_final[[i]]$inspections
+    } else {
+    #do nothing  
+    }
+  }
+  return(first * second)
+}
+```
+
+Solution to Part One
+```{r}
+calc_monkey_business(monkey_round)
+```
+
+## Part Two: 10,000 Rounds and Unbounded Worry Level
+
+The changes in Part Two are that the worry level is no longer divided by 3 after each inspection.  In addition, we know want to calculate the monkey business after 10,000 rounds and not just 20 rounds.  Considering that some of the operations involve squaring the worry level after each inspection, it becomes clear that the worry level values will quickly exceed the numbers which can be reasonably handled using normal computer options.  The problem statement rather vaguely tells us we need to find another way to keep the worry levels from exponentially growing over the 10,000 rounds.  We create a new function to calculate worry level without the divisor.
+```{r}
+calc_worry2 <- function(worry_init, operation, value) {
+  if (operation == "^") worry <- worry_init^value
+  else if (operation == "+") worry <- worry_init + value
+  else if (operation == "*") worry <- worry_init * value
+
+  return(worry)
+}
+```
+
+So how to do this?  The key is to realize that the feature that needs to be maintained is whether the worry level can be divided by any of the test operation values.  This can be achieved by taking the least common multiple of those values.  In this case, the values: 5, 17, 2, 7, 3, 11, 13, 19 are all prime numbers.  The least common multiple in this case is obtained by multiplying all 8 values together.
+```{r}
+supermodulo <- 1
+
+for (k in 1:length(monkey_ops)) {
+  supermodulo <- supermodulo * monkey_ops[[k]]$test  
+}
+
+supermodulo
+```
+A minor change to the ```perform_round``` function is used to apply the "supermodulo" (i.e. least common multiple) to the worry level to keep it from becoming exponentially large.
+```{r}
+perform_round2 <- function(monkey_ops, supermodulo) {
+  for (i in 1:length(monkey_ops)) {
+  
+    if (length(monkey_ops[[i]]$items) > 0) {
+  
+      for (j in 1:length(monkey_ops[[i]]$items)) {
+        
+        worry_level <- calc_worry2(monkey_ops[[i]]$items[1], monkey_ops[[i]]$opaction, monkey_ops[[i]]$opvalue)
+        worry_level <- worry_level %% supermodulo
+        monkey_ops[[i]]$inspections <- monkey_ops[[i]]$inspections + 1
+        
+        if ((worry_level %% monkey_ops[[i]]$test) == 0) {
+          monkey_ops[[monkey_ops[[i]]$iftrue+1]]$items <- c(monkey_ops[[monkey_ops[[i]]$iftrue+1]]$items, worry_level)
+        } else {
+          monkey_ops[[monkey_ops[[i]]$iffalse+1]]$items <- c(monkey_ops[[monkey_ops[[i]]$iffalse+1]]$items, worry_level)
+        }
+        
+        monkey_ops[[i]]$items <- monkey_ops[[i]]$items[-1]
+      }
+    }
+  }
+  return(monkey_ops)
+}
+```
+
+Now, we perform the monkey business for 10,000 rounds.
+```{r}
+monkey_round <- monkey_ops
+
+for (k in 1:10000) {
+  monkey_round <- perform_round2(monkey_round, supermodulo)
+}
+```
+
+Then, we calculate the monkey business using the same function as in Part One.
+```{r}
+calc_monkey_business(monkey_round)
+```
+## Summary
+The difficult part of the Day 11 problem is to figure out how to keep the worry level from exponentially growing over the 10,000 rounds of Part Two which cannot be handled by normal computation.  Once the trick of using the least common multiple ("supermodulo") to contain the worry levels without affecting the logic of the monkey inspections is identified, the solution can be found in a straightforward manner.  Using the list to store the monkey information worked well although I was curious about making a monkey class instead.  Perhaps, we will save this for a future post.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
+
+
+
