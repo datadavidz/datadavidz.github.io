@@ -1,0 +1,166 @@
+---
+title: "Advent of Code Day 13: Recursion"
+date: 2023-08-02
+---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
+
+Creating a recursive function to compare nested lists.
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 13.  The task is to sort packets from a distress signal that have been decoded out of order.  The packets are provided in pairs and whether they are in the correct order.  The packets resemble a nested list format as shown in the examples below.
+
+```
+[1,1,3,1,1]
+[1,1,5,1,1]
+
+[[1],[2,3,4]]
+[[1],4]
+
+[9]
+[[8,7,6]]
+
+[[4,4],4,4]
+[[4,4],4,4,4]
+
+[7,7,7,7]
+[7,7,7]
+
+[]
+[3]
+
+[[[]]]
+[[]]
+
+[1,[2,[3,[4,[5,6,7]]]],8,9]
+[1,[2,[3,[4,[5,6,0]]]],8,9]
+```
+
+## Loading the input file
+
+The data is read into strings using ```read_lines``` from the ```readr``` package which has the handy option to ignore the blank rows.  In addition, any white space before or after the packet is removed using ```str_trim```.
+```{r}
+#| warning: false
+library(readr)
+library(stringr)
+
+filepath <- here::here("./posts/data/aoc/day13_input.txt")
+
+packets <- read_lines(filepath, skip_empty_rows = TRUE)
+packets <- str_trim(packets)
+```
+
+In Python, the packet string can be directly evaluated to a list however, in R, the packet string needs to be modified first.  In R, a list is declared using the ```list``` function.  For this problem, a ```packet_to_list``` function was created to substitute all left brackets with ```list(``` and all right brackets with ```)```.  The modified string was then parsed and evaluated to create a nested list for each packet.
+```{r}
+packet_to_list <- function(packet1) {
+  temp <- gsub("\\[", "list\\(", packet1)
+  temp <- gsub("\\]", "\\)", temp)
+  return(eval(parse(text = temp)))
+}
+```
+
+## Part One: Ordering of the Packets
+
+The order of each pair of packets needs to assessed as to whether it is correct or not.  Multiple rules are provided to determine whether the order is correct.  The contents of the lists in each packet are compared element by element.  If both elements are integers, the integer on the left (from first packet) should be less than the integer on the right (from second packet).  If one element is an integer and one is a list, the integer is converted to a list with the integer as the only list element.  If the left list runs out of items before the right list, the packets are in the correct order.  The first element shown to be in the correct or incorrect order determines whether the order for the entire packet is correct.  If a decision cannot be made on the elements, the next elements are compared.
+
+Since the number of nested lists within each packet is not the same, a recursive function is useful to handle these comparisons.  A function called ```packet_compare``` has been developed below to apply the ordering rules.  If the integer for the left (first) packet is less than the integer in right (second) packet, the function returns a negative value.  So, negative value means correct order and positive value means an incorrect order.  If all the integers are the same, the length of the left packet minus the length of the right packet is returned.  In this case, a negative value is also the correct order.
+```{r}
+packet_compare <- function(packet1, packet2) {
+  
+  if (class(packet1) == "numeric") {
+    if(class(packet2) == "numeric") {
+      return(packet1 - packet2)
+    } else {
+      return(packet_compare(list(packet1), packet2))
+    }
+  } else {
+    if (class(packet2) == "numeric") {
+      return(packet_compare(packet1, list(packet2)))
+    }
+  }
+  #handle cases where packet1 is zero length
+  if (length(packet1) == 0 & length(packet2) > 0) return(-1)
+  if (length(packet1) == 0 & length(packet2) == 0) return(0)
+
+  for (i in 1:length(packet1)) {
+    if (length(packet2) >= i) {
+      v <- packet_compare(packet1[[i]], packet2[[i]])
+      if (v != 0) {
+        return(v)
+      }
+    }
+  }
+  return(length(packet1) - length(packet2))
+}
+```
+
+The solution to Part One is found by comparing each pair of packets, adding the indices for the packets in the correct order and reporting the total.  In this case, we iterate by 2 and adjust the indices accordingly since the first and second packet correspond to an index of 1.
+```{r}
+result <- 0
+
+for (i in seq(1, length(packets), 2)) {
+  test <- packet_compare(packet_to_list(packets[i]), packet_to_list(packets[i+1]))
+  if (test < 0) {
+    result <- result + (i+1)/2
+  }
+}
+
+print(result)
+```
+
+## Part Two: Finding indices for [[2]] and [[6]]
+
+The problem in Part Two is presented a bit misleadingly.  We are asked to order all of the packets in the input dataset while also adding the packets [[2]] and [[6]].  We are asked to place all of the packets in order and report the indices for [[2]] and [[6]].  The misleading part is that you really don't need to order all of the packets to determine the solution.  You simply need to first compare each packet to [[2]] and if it is lower order then the index for [[2]] and [[6]] both are incremented by 1.  If the packet is higher order than [[2]], a second comparison is made to [[6]] and if it is lower then the index for [[6]] is incremented by 1 otherwise neither index is incremented.  The same ```packet_compare``` function from Part One is used here.
+```{r}
+ind2 <- 1
+ind6 <- 2
+
+for(i in 1:length(packets)) {
+  test <- packet_compare(packet_to_list(packets[i]), list(list(2)))
+  if (test < 0) {
+    ind2 <- ind2 + 1
+    ind6 <- ind6 + 1
+  } else {
+    test2 <- packet_compare(packet_to_list(packets[i]), list(list(6)))
+    if (test2 < 0) {
+      ind6 <- ind6 + 1
+    }
+  }
+}
+
+ind2*ind6
+```
+
+The solution to Part Two is the product of the indices for [[2]] and [[6]] after checking all of the packets.
+
+## Summary
+
+The Day 13 problem was an excellent use case for a recursive function.  The recursive function really simplified the comparisons of the packets without determining the number of nested lists in each packet upfront.  I imagine this function also was quite a bit faster than pre-checking the number of nested lists in each packet and iterating through each one.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
