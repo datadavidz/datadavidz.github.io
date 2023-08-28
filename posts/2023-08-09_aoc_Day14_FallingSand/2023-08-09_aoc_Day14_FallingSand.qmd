@@ -1,4 +1,316 @@
 ---
-title: "Untitled"
+title: "Advent of Code Day 14: Falling Sand"
+date: 2023-08-09
 ---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
 
+Creating a recursive function to track the path of falling sand in a cavern
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 14.  In this problem, you scan a cavern with a device which provides you with the rock structure.  Sand is falling from a specific location at the top of the cavern.  Sand collects on the rocks as it descends into the cavern until reaching the edge of cavern where it falls into an abyss.  You are provided a map of the rocks which are represented as points which are connected by straight horizontal or vertical lines as shown below:
+
+```
+498,4 -> 498,6 -> 496,6
+503,4 -> 502,4 -> 502,9 -> 494,9
+```
+
+Which can be used to generate a map as shown below:
+```
+  4     5  5
+  9     0  0
+  4     0  3
+0 ......+...
+1 ..........
+2 ..........
+3 ..........
+4 ....#...##
+5 ....#...#.
+6 ..###...#.
+7 ........#.
+8 ........#.
+9 #########.
+```
+
+Where "." are open spaces and "#" are representing the rock structure.  The sand comes out in units which fall straight down until it hits a rock or another sand unit.  If it is blocked, the sand unit will try to go diagonally down and to the left.  If still blocked, the sand unit will try to go diagonally down and the right.  If all three directions are blocked, the sand comes to rest at its current location and is marked with an "o".  If the sand goes past the furthest rock mapped to the left or right then it falls into the abyss.
+
+## Loading the input file
+
+The data is read into strings using ```read_lines``` from the ```readr``` package which has the handy option to ignore the blank rows.  In addition, any white space before or after the packet is removed using ```str_trim```.
+```{r}
+#| warning: false
+library(readr)
+library(stringr)
+library(purrr)
+
+filepath <- here::here("./posts/data/aoc/day14_input.txt") 
+
+rocks <- read_lines(filepath, skip_empty_rows = TRUE)
+rocks <- str_trim(rocks)
+head(rocks)
+```
+The idea was to save each rock structure in its own list where each list element would contain the horizontal and vertical coordinate points in a vector.  Three steps are required to create this data structure: 1) remove the arrows ("->") and replace with a single space, 2) split the coordinate pairs into their own lists and 3) reformat each coordinate pair string into a numeric vector.
+```{r}
+# Remove the arrows
+structure <- list()
+for (rock in rocks) {
+  structure <- c(structure, unlist(str_replace_all(rock, " -> ", " ")))
+}
+# Split the coordinate pairs into their own lists
+for (i in 1:length(structure)) {
+  structure[[i]] <- str_split(structure[[i]], " ")
+}
+# Reformat the coordinate pairs into numeric vectors
+for (i in 1:length(structure)) {
+  structure[[i]] <- str_split(unlist(structure[[i]]), ",")
+  structure[[i]] <- map(structure[[i]], function(x) as.numeric(x))
+}
+structure[[1]]
+```
+## Part One: Falling into the Abyss
+
+In Part One, the coordinates in the input file define the overall map size.  If the sand travels outside this map, it falls into the "abyss".  The goal of this part is to determine how many units of sand fall before sand begins to fall into the abyss.  The first step is to determine the size of the map.
+```{r}
+map_size <- list(min_x = 9999, max_x = 0, min_y = 9999, max_y = 0)
+
+for (i in 1:length(structure)) {
+  for (j in 1: length(structure[[i]])) {
+    if (structure[[i]][[j]][1] < map_size[["min_x"]]) {
+      map_size[["min_x"]] <- structure[[i]][[j]][1]
+    } else if (structure[[i]][[j]][1] > map_size[["max_x"]]) {
+      map_size[["max_x"]] <-structure[[i]][[j]][1]
+    } else {
+      #do nothing
+    }
+    
+    if (structure[[i]][[j]][2] < map_size[["min_y"]]) {
+      map_size[["min_y"]] <- structure[[i]][[j]][2]
+    } else if (structure[[i]][[j]][2] > map_size[["max_y"]]) {
+      map_size[["max_y"]] <-structure[[i]][[j]][2]
+    } else {
+      #do nothing
+    } 
+  }
+}
+map_size
+```
+The minimum and maximum values can then be used to construct a matrix to serve as a map for the rock structures where the x coordinates correspond to columns and y coordinates correspond to rows.  The matrix is initiated with "." characters and the rock structure is indicated with "#" characters.
+```{r}
+num_rows <- map_size[["max_y"]] + 1  #because the first column is "0" 
+num_cols <- map_size[["max_x"]] - map_size[["min_x"]] + 1
+
+blank_map <- matrix(rep(".", num_rows*num_cols), nrow = num_rows, ncol = num_cols)
+```
+
+```{r}
+rock_map <- blank_map
+
+for (i in 1:length(structure)) {
+  for (j in 1:(length(structure[[i]])-1)) {
+    start_pt <- structure[[i]][[j]]
+    end_pt <- structure[[i]][[j+1]]
+    for (m in start_pt[1]:end_pt[1]) {
+      for(n in start_pt[2]:end_pt[2]) {
+        rock_map[n+1, m-map_size[["min_x"]]+1] <- "#"
+      }
+    } 
+  }
+}
+```
+
+Plot the map
+```{r}
+#| warning: false
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+
+plot_start <- rock_map |> 
+  as_tibble() |>
+  mutate(row_id = row_number()) |>
+  pivot_longer(cols = starts_with("V"), names_to = "name", values_to = "value") |>
+  mutate(col_id = as.integer(sub("V", "", name)))|>
+  select(row_id, col_id, value)
+```
+
+```{r, fig.height = 7, fig.width = 9}
+p1 <- plot_start |>
+  rowwise() |>
+  mutate(rock = ifelse(value == "#", "yes", "no")) |>
+  ungroup() |>
+  ggplot(aes(x = col_id, y = row_id, label = value, color = factor(rock))) +
+    geom_text() +
+    scale_y_reverse() +
+    theme_void() +
+    theme(legend.position = "none") +
+    scale_color_manual(values = c("#D3D3D3", "#3D3D3D"))
+p1
+```
+
+Finding the resting locations for each sand unit is performed using a recursive function.  The recursive function helps in these cases where the number of steps in any direction are difficult to calculate upfront.  Here, we can just code the different options and send the new location back to the function until it finds its resting spot.  An ```overflow```
+```{r}
+falling_sand <- function(c_loc, r_map) {
+  #try down
+  if (r_map[c_loc[1]+1, c_loc[2]] == ".") {
+    return(falling_sand(c(c_loc[1]+1, c_loc[2]), r_map))
+  } else {
+    #try left
+    if (c_loc[2]-1 < 1) return(list(r_map, overflow = TRUE))
+    if (r_map[c_loc[1]+1, c_loc[2]-1] == ".")  {
+      return(falling_sand(c(c_loc[1]+1, c_loc[2]-1), r_map))
+    } else {
+      #try right
+      if(c_loc[2]+1 > ncol(r_map)) return(list(r_map, overflow = TRUE))
+      if (r_map[c_loc[1]+1, c_loc[2]+1] == ".") {
+        return(falling_sand(c(c_loc[1]+1, c_loc[2]+1), r_map))
+      } else {
+        r_map[c_loc[1], c_loc[2]] <- "o"
+      }
+    }
+  }
+  return(list(r_map, overflow = FALSE))
+}
+```
+
+Now, the falling of the sand begins!  We initiate units of sand until the sand falls into the abyss (overflow = TRUE).  A counter is also included to determine then number of sand units dropped and also to try to avoid an infinite loop. 
+```{r}
+loop_count <- 0
+temp <- list(rock_map, overflow = FALSE)
+
+while (temp[["overflow"]] == FALSE & loop_count < 10000) {
+  loop_count <- loop_count + 1
+  temp <- falling_sand(c(1, 500-map_size[["min_x"]]+1), temp[[1]])
+}
+
+print(paste("Sand bags dropped = ", loop_count-1))
+```
+
+```{r}
+plot_data <- temp[[1]] |> 
+  as_tibble() |>
+  mutate(row_id = row_number()) |>
+  pivot_longer(cols = starts_with("V"), names_to = "name", values_to = "value") |>
+  mutate(col_id = as.integer(sub("V", "", name)))|>
+  select(row_id, col_id, value)
+
+p2 <- plot_data |>
+  ggplot(aes(x = col_id, y = row_id, label = value, color = factor(value))) +
+    geom_text() +
+    scale_y_reverse() +
+    theme_void() +
+    theme(legend.position = "none") +
+    scale_color_manual(values = c("#3D3D3D", "#D3D3D3", "#B3AC85"))
+p2
+```
+## Part Two: The Hidden Cave Floor
+
+In Part Two, we realize that there isn't actually an abyss but rather there is a cavern floor which extends two coordinates below the lowest rock structure in the map.  The floor is assumed to extend endlessly in both directions.  The goal of part two is to find out how many sand units fall until the inlet for the sand will be clogged.  It is straightforward to increase the number of rows by two for the cavern floor but how to determine the number of columns required?  The maximum size will be a triangle down to the bottom row which can be figured as twice the number of rows plus 1 (actually 2 less is required since the inlet is clogged on the second row).
+```{r}
+num_rows <- map_size[["max_y"]] + 3  #because the first column is "0" 
+num_cols <- (num_rows * 2) + 1
+
+blank_map <- matrix(rep(".", num_rows*num_cols), nrow = num_rows, ncol = num_cols)
+```
+
+The rock map is created in the same manner as in Part One however the rock line at the bottom needs to be added for the cavern floor.
+```{r}
+rock_map <- blank_map
+
+for (i in 1:length(structure)) {
+  for (j in 1:(length(structure[[i]])-1)) {
+    start_pt <- structure[[i]][[j]]
+    end_pt <- structure[[i]][[j+1]]
+    for (m in start_pt[1]:end_pt[1]) {
+      for(n in start_pt[2]:end_pt[2]) {
+        rock_map[n+1, m-num_cols+3] <- "#"
+      }
+    } 
+  }
+}
+#Add the line at the bottom
+for (i in 1:num_cols) {
+  rock_map[num_rows, i] <- "#"
+}
+```
+
+A similar recursive function is used but with a different meaning for "overflow".  In this case, overflow means that the sand outlet is clogged rather than sand falling into the abyss.  The modifications are shown below.
+```{r}
+falling_sand2 <- function(c_loc, r_map) {
+  #check if outlet is clogged
+  if (r_map[1, 168] == "o") {
+    return(list(r_map, overflow = TRUE))
+  } else {
+    #try down
+    if (r_map[c_loc[1]+1, c_loc[2]] == ".") {
+    return(falling_sand2(c(c_loc[1]+1, c_loc[2]), r_map))
+    } else {
+      #try left
+      #if (c_loc[2]-1 < 1) return(list(r_map, overflow = TRUE))
+      if (r_map[c_loc[1]+1, c_loc[2]-1] == ".")  {
+        return(falling_sand2(c(c_loc[1]+1, c_loc[2]-1), r_map))
+      } else {
+        #try right
+        #if(c_loc[2]+1 > ncol(r_map)) return(list(r_map, overflow = TRUE))
+        if (r_map[c_loc[1]+1, c_loc[2]+1] == ".") {
+          return(falling_sand2(c(c_loc[1]+1, c_loc[2]+1), r_map))
+        } else {
+          r_map[c_loc[1], c_loc[2]] <- "o"
+        }
+      }
+    }
+  }
+  return(list(r_map, overflow = FALSE))
+}
+```
+
+As before, we loop through the sand units until the overflow condition is met.
+```{r}
+loop_count <- 0
+temp <- list(rock_map, overflow = FALSE)
+
+while (temp[["overflow"]] == FALSE & loop_count < 50000) {
+  loop_count <- loop_count + 1
+  temp <- falling_sand2(c(1, 500-num_cols+3), temp[[1]])
+}
+
+print(paste("Sand bags dropped = ", loop_count-1))
+```
+## Summary
+
+Overall, the Day 14 puzzle required a lot of work to read the input file, figure out how to create the map and then figure out the number of falling sand units.  The recursive function worked well for determining the resting location for each sand unit.  One source of frustration was keeping track of the x coordinate as column and y coordinate as row since the order of parameters is reversed in the matrix location.
+
+```{r}
+#| echo: false
+#Code to save the ggplot to png
+
+# ragg::agg_png(filename = "AOC_Day14.png", width = 9, height = 7, units = "in", res = 320)
+# p2
+# dev.off()
+```
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
