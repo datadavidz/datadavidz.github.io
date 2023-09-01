@@ -1,0 +1,197 @@
+---
+title: "Advent of Code Day 15: Distress Beacon"
+date: 2023-09-01
+---
+```{r}
+#| echo: false
+#| results: "hide"
+renv::use(lockfile = "renv.lock")
+```
+
+Locating the position of a distress beacon using Manhattan distance from sensors
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 15.  The locations for sensors and the closest beacon to each sensor is provided.  None of the beacons identified are in distress.  The goal is to use this data to find to location of the beacon sending the distress signal.
+
+## Loading the input file
+
+The data is read into strings using ```read_lines``` from the ```readr``` package which has the handy option to ignore the blank rows.  In addition, any white space before or after the packet is removed using ```str_trim```.
+```{r}
+#| warning: false
+library(readr)
+library(stringr)
+library(purrr)
+
+filepath <- here::here("./posts/data/aoc/day15_input.txt")
+
+beacons <- read_lines(filepath, skip_empty_rows = TRUE)
+beacons <- str_trim(beacons)
+head(beacons)
+```
+The only important information are the numbers indicating the sensor and closest beacon positions. We strip the other characters using some ```stringr``` functions and then convert each line to a numeric vector.
+```{r}
+locs <- str_remove(beacons, "Sensor at ") |>
+  str_replace(": closest beacon is at ", " ") |>
+  str_replace_all("x=", "") |>
+  str_replace_all(", y=", " ") |>
+  str_split(" ")
+
+locs <- map(locs, \(x) as.numeric(x))
+head(locs)
+```
+## Part One: Searching one y location
+
+The goal of part one is to focus on one y location (y = 2000000) and determine all of the x locations where the distress beacon **cannot** be located.  These locations can be determined from the input data considering that the sensors are identifying the close beacon and, therefore, the locations closer cannnot contain a beacon.  Two helper functions are set up first to measure the Manhattan distance between a sensor and a beacon and to measure the distance between a sensor and the line forming the y location.
+```{r}
+find_beacon_distance <- function(b_vctr) {
+  dist <- abs(b_vctr[1:2] - b_vctr[3:4])
+  dist <- sum(dist)
+  return(dist)
+}
+find_dist_from_y <- function(b_vctr, y = 10) {
+  dist <- abs(b_vctr[2] - y)
+  return(dist)
+}
+```
+
+Next, we loop through the sensor-beacon locations to find the where the distress beacon cannot be located.  Initially, I saved all of the locations in a list but it becomes a very large amount of locations quickly.  The "not" locations were in a consecutive sequence so it is only needed to save the starting and ending locations.
+```{r}
+not_beacon <- list()
+y_loc <- 2000000
+
+for (i in 1:length(locs)){
+  b_dist <- find_beacon_distance(locs[[i]])
+  y_dist <- find_dist_from_y(locs[[i]], y_loc)
+  
+  if (b_dist > y_dist) {
+    start_loc <- locs[[i]][1] - (b_dist - y_dist)
+    end_loc <- locs[[i]][1] + (b_dist - y_dist)
+    not_beacon <- c(not_beacon, list(c(start_loc, end_loc)))
+    #this took too long
+    # for (j in start_loc:end_loc) {
+    #   if (!(list(c(j, y_loc)) %in% not_beacon)) not_beacon <- c(not_beacon, list(c(j, y_loc)))
+    # }
+  }
+}
+head(not_beacon)
+```
+It is easier to count the number of locations if the start/end locations are listed in order.  The reason is that the location spans can overlap so we don't want to count a specific location more than once.
+```{r}
+not_beacon <- not_beacon[order(map_vec(not_beacon, ~ .[[1]]))]
+head(not_beacon)
+```
+The "not beacon" locations are then processed to find the total number.  Anticipating part two, the interval for these positions is saved rather than counting the total number of positions.
+```{r}
+cur_loc <- not_beacon[[1]][1]-1
+intervals <- list()
+q <- 0
+
+for (i in 1:length(not_beacon)) {
+  if (cur_loc > not_beacon[[i]][2]) {
+    #skip
+  } else if (cur_loc < not_beacon[[i]][1]) {
+    cur_loc <- not_beacon[[i]][2]
+    q <- q + 1
+    intervals[[q]] <- c(not_beacon[[i]][1], not_beacon[[i]][2])
+  } else if (cur_loc == not_beacon[[i]][1]) {
+    cur_loc <- not_beacon[[i]][2]
+    intervals[[q]] <- c(intervals[[q]][1], not_beacon[[i]][2])
+  } else {
+    #current point is between start and end point
+    cur_loc <- not_beacon[[i]][2]
+    intervals[[q]] <- c(intervals[[q]][1], not_beacon[[i]][2])
+  }
+}
+intervals
+```
+The total number of positions is found by the difference between the start and end of the interval.  We also need to subtract any beacons located on the line (which will also be within the interval).
+```{r}
+beacon_yloc <- locs[map_lgl(locs, ~ .[[4]] == y_loc)]
+paste("The total number of positions where the beacon cannot be located:", 
+      intervals[[1]][2] - intervals[[1]][1] - length(unique(map_vec(beacon_yloc, ~ .[[3]]))))
+```
+## Part Two: Find the distress beacon location
+
+As anticipated, we now need to find the location of the distress location.  Our device has determined the location is between 0 and 4000000 in both the x and y directions.  We can use mostly the same code developed in Part One but now we need to loop through many y "lines".  I did this part in one script which is not the best way but it worked after a bit of troubleshooting.  It is important to not aggregate data that is not needed to answer the question.  The critical piece of information are the intervals.  The y location with 2 intervals separated by one position identifies the location of the distress beacon.
+```{r}
+#| cache: true
+y_lo <- 0
+y_hi <- 4000000
+all_intervals <- list()
+
+
+for (j in y_lo:y_hi) {
+  not_beacon <- list()
+  for (i in 1:length(locs)){
+    b_dist <- find_beacon_distance(locs[[i]])
+    y_dist <- find_dist_from_y(locs[[i]], j)
+    
+    if (b_dist > y_dist) {
+      #print(i)
+      start_loc <- locs[[i]][1] - (b_dist - y_dist)
+      end_loc <- locs[[i]][1] + (b_dist - y_dist)
+      not_beacon <- c(not_beacon, list(c(start_loc, end_loc)))
+    }
+  }
+  not_beacon <- not_beacon[order(sapply(not_beacon, '[[', 1))]
+  
+  cur_loc <- not_beacon[[1]][1]-1
+  intervals <- list()
+  q <- 0
+  
+  for (k in 1:length(not_beacon)) {
+    if (cur_loc > not_beacon[[k]][2]) {
+      #skip
+    } else if (cur_loc < not_beacon[[k]][1]) {
+      cur_loc <- not_beacon[[k]][2]
+      q <- q + 1
+      intervals[[q]] <- c(not_beacon[[k]][1], not_beacon[[k]][2])
+    } else if (cur_loc == not_beacon[[k]][1]) {
+      cur_loc <- not_beacon[[k]][2]
+      intervals[[q]] <- c(intervals[[q]][1], not_beacon[[k]][2])
+    } else {
+      #current point is between start and end point
+      cur_loc <- not_beacon[[k]][2]
+      intervals[[q]] <- c(intervals[[q]][1], not_beacon[[k]][2])
+    }
+  }
+  if (length(intervals) > 1) {
+    all_intervals <- list(intervals, j)
+  }
+}
+```
+
+The solution to Part Two asks for the x location multiplied by 4000000 plus the y location.
+```{r}
+print(paste("The location of the distress beacon is: x =", all_intervals[[1]][[1]][2] + 1, "y =", all_intervals[[2]]))
+print(paste("The Part Two solution is:",
+            format((all_intervals[[1]][[1]][2] + 1) * 4000000 + all_intervals[[2]], scientific = FALSE)))
+```
+## Summary
+
+Figuring out the logic to find the distress beacon from the input data was the main challenge for the Day 15 challenge.  Using lists and some of the ```purrr``` map functions helped streamline the code.  Breaking out some of the last script into helper functions would have helped with readability and troubleshooting.  I needed to avoid aggregating and storing intermediate information in order to loop through all 4000000 lines in Part Two.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
