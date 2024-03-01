@@ -198,7 +198,7 @@ Using the shortcut of finding the repeating sequence enables finding the height 
 
 ## Summary
 
-The simulation of dropping a sequence of rocks into a cavern was successfully executed in R for one trillion rocks.  Some nice optimizations were implemented to have concise code which executes relatively quickly.  It helped to represent the rock coordinates as complex numbers.  The map functions from the ```purrr``` package enabled concise code.  The shortcut to find a repeating sequence using a named list in a manner analagous to a Python dictionary was the key to completing Part Two.
+The simulation of dropping a sequence of rocks into a cavern was successfully executed in R for one trillion rocks.  Some nice optimizations were implemented to have concise code which executes relatively quickly.  It helped to represent the rock coordinates as complex numbers.  The map functions from the ```purrr``` package enabled concise code.  The shortcut to find a repeating sequence using a named list in a manner analogous to a Python dictionary was the key to completing Part Two.
 
 :::{.callout-tip collapse="true"}
 ## Expand for Session Info
