@@ -1,0 +1,225 @@
+---
+title: "Advent of Code Day 16: BitOps and Hashtables"
+date: 2024-02-29
+---
+```{r}
+#| echo: false
+#| results: "hide"
+# renv::use(lockfile = "renv.lock")
+```
+
+Simulating falling rocks with different shapes (similar to the game Tetris)
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 17.  You arrive in a tall, narrow cavern with different shape rocks falling down.  If you can't figure out which rocks will drop next, you will be crushed.  The rocks have the following shapes (with '#' meaning rock and a '.' meaning a space:
+
+```
+####
+
+.#.
+###
+.#.
+
+..#
+..#
+###
+
+#
+#
+#
+#
+
+##
+##
+```
+
+The rocks fall in the order as shown from top to bottom. After the fifth rock has fallen, the sequence starts again in the same order.  The rocks are pushed left or right by jets of gas coming from the cavern walls.  The jets follow a sequence as shown below.
+
+```
+>>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>
+```
+
+A '>' means the gas jet pushes the rock to the right and a '<' means the gas jet pushes the rock to the right.  Once the end is reached, the sequence starts over again starting at the beginning.  The cavern is exactly 7 units wide.  A rock appears so that its left edge is two units away from the left cavern wall and 3 units from the highest rock (or the floor if no rocks have dropped).  After the rock appears, it alternates between being pushed by a gas jet and then falling one unit down.  If the rock is blocked from moving left or right due to another rock or the cavern wall, the rock stays at its current location.  If the rock is blocked from moving down due to another rock or the cavern floor, the rock becomes fixed at its current location and part of a solid rock structure in the cavern.  Once the rock becomes fixed, a new rock appears at the top of the cavern.
+
+The goal is to determine the height of the solid rock structure in the cavern after a specific number of rocks have fallen.  In Part One, you need to determine the height after 2022 rocks have fallen.  In Part Two, you need to determine the height after one trillion rocks have fallen.
+
+## Loading the input file
+
+The input file contains only the jet sequence which is a single string made up of '>' and '<' characters.  The input file is much longer than in the example shown above.  The string is split into an array of single characters using the ```str_split_1``` function from the ```stringr``` package.
+
+```{r}
+library(readr)
+library(stringr)
+library(purrr)
+
+filepath <- here::here("./posts/data/aoc/day17_input.txt")
+#filepath <- here::here("./posts/data/aoc/day17_test.txt")
+
+input_jet <- read_lines(filepath, skip_empty_rows = TRUE)
+input_jet <- str_trim(input_jet) |> str_split_1("")
+
+length(input_jet)
+```
+At first, I tried representing the rocks using the characters as shown however this became overly complex programmatically.  The better way to represent the rocks is numerically according to the x and y coordinates.  A further optimization can be realized if you use complex numbers where the real part represents the x coordinate and the imaginary part represents the y coordinate.  I learned this from the Day 17 solution posted by [hyper neutrino](https://github.com/hyper-neutrino/advent-of-code).  In fact, much of the solution presented below is based upon his Python implementation.  The five types of rocks represented as complex numbers are shown below.
+
+```{r}
+rocks <- list(
+  c(0, 1, 2, 3),
+  c(1, 1i, 1+1i, 2+1i, 1+2i),
+  c(0, 1, 2, 2+1i, 2+2i),
+  c(0, 1i, 2i, 3i),
+  c(0, 1, 1i, 1+1i)
+)
+```
+
+The jet sequence is also best represented numerically which can be accomplished with a single line of code.  A '>' or shift to the right is changed to a 1 and a '<' or shift to the left is change to a -1.  The ```map_int``` function from the ```purrr``` package is used to transform the character array into a numerical list.
+
+```{r}
+jets <- map_int(input_jet, \(x) ifelse(x == ">", 1, -1))
+```
+
+## Part One
+
+Now, we need to determine the height of the solid rock structure after 2022 rocks have dropped into the cavern.  The cavern floor and first rock are initialized.  The rock position is then first updated based on the gas jet and then updated based on dropping one unit down.  The set of map functions from the purrr package are used extensively to update the rock coordinates in a concise way.  The list containing the solid structure is occasionally updated to just the top 200 coordinates in order to optimize the speed of execution.
+
+```{r}
+# initialize the solid as the cavern floor
+solid <- map(0:6, \(x) x-1i)
+
+height <- 0
+rc <- 0 #rock count
+ri <- 0 #rock index
+lim <- 200 #limit the amount of data stored for the solid
+
+# update position of the first rock
+rock <- map(rocks[[ri+1]], \(x) x + 2 + (height + 3) * 1i)
+
+while (rc < 2022) {
+  for (jet in jets) {
+
+    # update the rock position due to the gas jet
+    moved <- map(rock, \(x) x + jet)
+    blocked <- any(moved %in% solid)
+    if (all(map_lgl(moved, \(x) (Re(x) < 7) & (Re(x) >= 0))) & !blocked) {
+      rock <- moved
+    }
+    # update the rock position to drop one unit
+    moved <- map(rock, \(x) x - 1i)
+    # if the rock is blocked from moving down then it becomes part of the solid
+    if (any(moved %in% solid)) {
+      solid <- c(solid, rock[!(rock %in% solid)])
+      rc <- rc + 1
+      height <- max(map_vec(solid, \(x) Im(x))) + 1
+      if (rc >= 2022) break
+      ri <- (ri + 1) %% 5
+      rock <- map(rocks[[ri+1]], \(x) x + 2 + (height + 3) * 1i)
+    } else {
+      # if rock is not blocked then update the position
+      rock <- moved
+    }
+    # keep the solid list from taking up too much memory
+    if (length(solid) > lim) solid <- solid[(length(solid)-(lim+1)):length(solid)]
+  }
+}
+
+height
+```
+After 2022 rocks have fallen, the height of the solid rock structure is 3117 units.
+
+## Part Two
+
+Apparently, the elephants are not impressed by the simulation of 2022 rocks and want to see the results after dropping a trillion rocks.  Of course, executing the same loop for a trillion rocks would take much too long so we need to find a shortcut.  The shortcut is to look for a repeating sequence as the rocks are dropped.  To find the start of the repeating sequence, we are looking for three conditions to be met: the jet index, the rock index and the top of the solid rock structure are the same values.
+
+```{r}
+solid <- map(0:6, \(x) x-1i)
+height <- 0
+numblock <- 1e12
+
+# store the rock count and height at each jet index, rock index and top of solid
+seen <- list()
+
+# summarize the top of the solid rock structure
+summarize_solid <- function() {
+  o <- rep(-20, 7)
+  for (x in solid) {
+    r <- Re(x)
+    i <- Im(x)
+    o[r+1] <- max(o[r+1], i)
+  }
+  top <- max(o)
+  return(map_int(o, \(x) x - top))
+}
+
+rc <- 0
+ri <- 0
+lim <- 200
+rock <- map(rocks[[ri+1]], \(x) x + 2 + (height + 3) * 1i)
+
+while (rc < numblock) {
+  for (ji in seq_along(jets)) {
+    jet <- jets[ji]
+    moved <- map(rock, \(x) x + jet)
+    blocked <- any(moved %in% solid)
+    if (all(map_lgl(moved, \(x) (Re(x) < 7) & (Re(x) >= 0))) & !blocked) {
+      rock <- moved
+    }
+    moved <- map(rock, \(x) x - 1i)
+    if (any(moved %in% solid)) {
+      solid <- c(solid, rock[!(rock %in% solid)])
+      rc <- rc + 1
+      height <- max(map_vec(solid, \(x) Im(x))) + 1
+      if (rc >= numblock) break
+      ri <- (ri + 1) %% 5
+      rock <- map(rocks[[ri+1]], \(x) x + 2 + (height + 3) * 1i)
+      # create a key with the jet index, rock index and top of the solid
+      key <- paste0(ji, ri, paste(summarize_solid(), collapse = ''))
+      # if the key has been seen before, calculate the offset
+      if (key %in% names(seen)) {
+        lrc <- seen[[key]][1] #last rock count
+        lh <- seen[[key]][2]  #last height
+        rem <- numblock - rc  #remainder of rocks left
+        rep <- floor(rem / (rc - lrc)) # number of repetitions of the same sequence
+        offset <- rep * (height - lh)  # amount to add to the height due to repeats
+        rc <- rc + (rep * (rc - lrc))  # update the rock count
+        seen <- list()                 # clear the seen list
+      }
+      seen[[key]] <- c(rc, height)
+    } else {
+      rock <- moved
+    }
+    if (length(solid) > lim) solid <- solid[(length(solid)-(lim+1)):length(solid)]
+  }
+}
+
+format(height + offset, scientific = FALSE)
+```
+Using the shortcut of finding the repeating sequence enables finding the height of 1553314121019 units for a trillion blocks in a little over a minute!  The rocks are iterated until the repeat is found, the rock count is jumped ahead for the number of repeats that can occur without exceeding one trillion rocks and then the rocks are iterated until one trillion rocks are dropped.
+
+## Summary
+
+The simulation of dropping a sequence of rocks into a cavern was successfully executed in R for one trillion rocks.  Some nice optimizations were implemented to have concise code which executes relatively quickly.  It helped to represent the rock coordinates as complex numbers.  The map functions from the ```purrr``` package enabled concise code.  The shortcut to find a repeating sequence using a named list in a manner analagous to a Python dictionary was the key to completing Part Two.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
