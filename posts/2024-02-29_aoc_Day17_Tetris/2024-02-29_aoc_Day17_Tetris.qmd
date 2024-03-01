@@ -1,11 +1,11 @@
 ---
-title: "Advent of Code Day 16: BitOps and Hashtables"
+title: "Advent of Code Day 17: Coordinates as Complex Numbers"
 date: 2024-02-29
 ---
 ```{r}
 #| echo: false
 #| results: "hide"
-# renv::use(lockfile = "renv.lock")
+renv::use(lockfile = "renv.lock")
 ```
 
 Simulating falling rocks with different shapes (similar to the game Tetris)
