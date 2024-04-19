@@ -7,7 +7,7 @@ execute:
 ```{r}
 #| echo: false
 #| results: "hide"
-#renv::use(lockfile = "renv.lock")
+renv::use(lockfile = "renv.lock")
 ```
 
 Calculate surface area of a lava droplet using a breadth-first search approach
@@ -21,6 +21,7 @@ This post explains my solution to the [Advent of Code](http://adventofcode.com/)
 The input file contains a file where each line is a series of 3 numbers separated by a comma (e.g. "13, 6, 3").  The ```read_lines``` function from the ```readr``` package is used to read the input file.
 
 ```{r}
+#| warning: false
 library(readr)
 library(stringr)
 library(collections)
@@ -59,8 +60,13 @@ for (cube in cubes) {
 
 sc
 ```
-Part two:
+The total surface area calculated in Part One is 4536 units.
 
+## Part Two
+
+The calculation of surface area in Part One is not quite correct.  This calculation does not take into account the case where the cube face is in an inner pore within the lava droplet.  In this case, this face will not be accessible from outside the droplet and should not be included in the surface area calculation.
+
+I will use a slightly different coordinate system for the cube faces to help with the calculations. In this case, the coordinate indicates the center of the cube and each face will be 0.5 units away from the center.
 ```{r}
 offsets <- list(c(-0.5,    0,    0),
                 c( 0.5,    0,    0),
@@ -70,6 +76,7 @@ offsets <- list(c(-0.5,    0,    0),
                 c(   0,    0,  0.5)) 
 ```
 
+The faces are stored in a list and the coordinates are stored in the list name.  The minimum (mx, my, mz) and maximum (Mx, My, Mz) coordinates for the droplet are saved to understand the outer limits around the droplet.
 ```{r}
 mx <- my <- mz <- Inf
 Mx <- My <- Mz <- -Inf
@@ -102,6 +109,7 @@ for (cube in cubes) {
 }
 ```
 
+A breadth-first search is used to determine which coordinates are part of the air around the droplet (not one of the droplet faces).  To begin the search, 1 is subtracted to the minimum coordinates and 1 is added to the maximum coordinates.
 ```{r}
 mx <- mx - 1
 my <- my - 1
@@ -112,7 +120,7 @@ My <- My + 1
 Mz <- Mz + 1
 ```
 
-Using deque with lists
+The ```collections``` package is used to create the queue (deque) for storing the coordinates to be explored by the breadth-first search. If the search coordinates are outside the min/max limits then it skips to the next coordinate.  If the search coordinates are part of the droplet then it skips to the next coordinate.  If the search coordinates are already in ```air``` then it skips to the next coordinate otherwise it is appended to the ```air```.
 ```{r}
 start <- Sys.time()
 q <- deque(list(c(mx, my, mz)))
@@ -137,3 +145,62 @@ while (q$size() > 0) {
 }
 end <- Sys.time()
 ```
+I tried the ```deque``` function to see whether it would bring any speed advantage over a manual implementation but did not observe any significant improvement.  This breadth-first search took 44 min to run in this implementation.
+
+A ```free``` list is used to contain all of the faces of the air cubes in the same format as for the faces of the droplet cubes.  This code is basically a reformatting of the air list.
+```{r}
+free <- list()
+
+for (a in air) {
+  for (d in offsets) {
+    k <-paste(a[1] + d[1], a[2] + d[2], a[3] + d[3], collapse = "")
+     if (!(k %in% names(free))) {
+       free[[k]] <- 0
+     }
+     free[[k]] <- free[[k]] + 1
+  }
+}
+```
+
+The surface area of the droplet is then calculated as the cube face coordinates which are in both the droplet(```faces```) and in the air (```free```).
+```{r}
+surface_area <- 0
+
+for (face in names(faces)) {
+  if (face %in% names(free)) {
+    surface_area <- surface_area + 1
+  }
+}
+
+surface_area
+```
+
+The total surface area as corrected in Part Two is 2606 units.  This is a significant correction from 4536 units calculated in Part One.
+
+## Summary
+
+Breadth-first search is used to find the air around a complex droplet surface as a means of calculating surface area.  The ```deque``` function from the ```collections``` package was used to manage the queue which made the code a bit cleaner but didn't improve the speed at all.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::

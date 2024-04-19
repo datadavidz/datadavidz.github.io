@@ -190,134 +190,212 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="loading-the-input-file" class="level2">
 <h2 class="anchored" data-anchor-id="loading-the-input-file">Loading the input file</h2>
 <p>The input file contains a file where each line is a series of 3 numbers separated by a comma (e.g.&nbsp;“13, 6, 3”). The <code>read_lines</code> function from the <code>readr</code> package is used to read the input file.</p>
-<div class="cell" data-hash="2024-03-11_aoc_Day18_SurfaceArea_cache/html/unnamed-chunk-2_d1c203588da51d4cf791dada1b916a3c">
+<div class="cell" data-hash="2024-03-11_aoc_Day18_SurfaceArea_cache/html/unnamed-chunk-2_ffbbd50cf2357b0e7ffd025b00a8c751">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(collections)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'collections' was built under R version 4.3.3</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'collections'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following object is masked from 'package:utils':
-
-    stack</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>filepath <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"./posts/data/aoc/day18_input.txt"</span>) <span class="co">#</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co">#filepath &lt;- here::here("./posts/data/aoc/day18_test.txt") #</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>cubes <span class="ot">&lt;-</span> <span class="fu">read_lines</span>(filepath, <span class="at">skip_empty_rows =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(collections)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>filepath <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"./posts/data/aoc/day18_input.txt"</span>) <span class="co">#</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#filepath &lt;- here::here("./posts/data/aoc/day18_test.txt") #</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>cubes <span class="ot">&lt;-</span> <span class="fu">read_lines</span>(filepath, <span class="at">skip_empty_rows =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="part-one" class="level2">
 <h2 class="anchored" data-anchor-id="part-one">Part One</h2>
 <p>We are first asked to determine the number of cube faces which are not attached to other cubes. This number can be calculated by first determining the total possible number of faces which is the total number of cubes multiplied by 6 since a cube has 6 faces. For each cube, the coordinates for each face are determined. If the face is adjacent to another cube, the face is not part of the surface area and subtracted from the total possible number of faces.</p>
 <div class="cell" data-hash="2024-03-11_aoc_Day18_SurfaceArea_cache/html/unnamed-chunk-3_85347599acf0bab3b75778cb278cd4c6">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#coordinate system can be viewed as lower left corner of cube</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>sides <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,  <span class="dv">0</span>,  <span class="dv">0</span>),</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>              <span class="fu">c</span>( <span class="dv">1</span>,  <span class="dv">0</span>,  <span class="dv">0</span>),</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">c</span>( <span class="dv">0</span>, <span class="sc">-</span><span class="dv">1</span>,  <span class="dv">0</span>),</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>              <span class="fu">c</span>( <span class="dv">0</span>,  <span class="dv">1</span>,  <span class="dv">0</span>),</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>              <span class="fu">c</span>( <span class="dv">0</span>,  <span class="dv">0</span>, <span class="sc">-</span><span class="dv">1</span>),</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>              <span class="fu">c</span>( <span class="dv">0</span>,  <span class="dv">0</span>,  <span class="dv">1</span>))</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#total possible side (face) count</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>sc <span class="ot">&lt;-</span> <span class="fu">length</span>(cubes) <span class="sc">*</span> <span class="dv">6</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (cube <span class="cf">in</span> cubes) {</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  temp <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">unlist</span>(<span class="fu">str_split</span>(cube, <span class="st">","</span>)))</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (side <span class="cf">in</span> sides) {</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    ss <span class="ot">&lt;-</span> <span class="fu">str_c</span>(temp <span class="sc">+</span> side, <span class="at">collapse =</span> <span class="st">","</span>)</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># subtract from total possible if occupied by an adjacent cube</span></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (ss <span class="sc">%in%</span> cubes) sc <span class="ot">&lt;-</span> sc <span class="sc">-</span> <span class="dv">1</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>sc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">#coordinate system can be viewed as lower left corner of cube</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>sides <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,  <span class="dv">0</span>,  <span class="dv">0</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>              <span class="fu">c</span>( <span class="dv">1</span>,  <span class="dv">0</span>,  <span class="dv">0</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>              <span class="fu">c</span>( <span class="dv">0</span>, <span class="sc">-</span><span class="dv">1</span>,  <span class="dv">0</span>),</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>              <span class="fu">c</span>( <span class="dv">0</span>,  <span class="dv">1</span>,  <span class="dv">0</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>              <span class="fu">c</span>( <span class="dv">0</span>,  <span class="dv">0</span>, <span class="sc">-</span><span class="dv">1</span>),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>              <span class="fu">c</span>( <span class="dv">0</span>,  <span class="dv">0</span>,  <span class="dv">1</span>))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#total possible side (face) count</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>sc <span class="ot">&lt;-</span> <span class="fu">length</span>(cubes) <span class="sc">*</span> <span class="dv">6</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (cube <span class="cf">in</span> cubes) {</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  temp <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">unlist</span>(<span class="fu">str_split</span>(cube, <span class="st">","</span>)))</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (side <span class="cf">in</span> sides) {</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    ss <span class="ot">&lt;-</span> <span class="fu">str_c</span>(temp <span class="sc">+</span> side, <span class="at">collapse =</span> <span class="st">","</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># subtract from total possible if occupied by an adjacent cube</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (ss <span class="sc">%in%</span> cubes) sc <span class="ot">&lt;-</span> sc <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>sc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 4536</code></pre>
 </div>
 </div>
-<p>Part two:</p>
+<p>The total surface area calculated in Part One is 4536 units.</p>
+</section>
+<section id="part-two" class="level2">
+<h2 class="anchored" data-anchor-id="part-two">Part Two</h2>
+<p>The calculation of surface area in Part One is not quite correct. This calculation does not take into account the case where the cube face is in an inner pore within the lava droplet. In this case, this face will not be accessible from outside the droplet and should not be included in the surface area calculation.</p>
+<p>I will use a slightly different coordinate system for the cube faces to help with the calculations. In this case, the coordinate indicates the center of the cube and each face will be 0.5 units away from the center.</p>
 <div class="cell" data-hash="2024-03-11_aoc_Day18_SurfaceArea_cache/html/unnamed-chunk-4_5cad7b1aea33499b9c07a9003ac42f9e">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>offsets <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>,    <span class="dv">0</span>,    <span class="dv">0</span>),</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                <span class="fu">c</span>( <span class="fl">0.5</span>,    <span class="dv">0</span>,    <span class="dv">0</span>),</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                <span class="fu">c</span>(   <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.5</span>,    <span class="dv">0</span>),</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                <span class="fu">c</span>(   <span class="dv">0</span>,  <span class="fl">0.5</span>,    <span class="dv">0</span>),</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                <span class="fu">c</span>(   <span class="dv">0</span>,    <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.5</span>),</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                <span class="fu">c</span>(   <span class="dv">0</span>,    <span class="dv">0</span>,  <span class="fl">0.5</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>offsets <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>,    <span class="dv">0</span>,    <span class="dv">0</span>),</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                <span class="fu">c</span>( <span class="fl">0.5</span>,    <span class="dv">0</span>,    <span class="dv">0</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                <span class="fu">c</span>(   <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.5</span>,    <span class="dv">0</span>),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                <span class="fu">c</span>(   <span class="dv">0</span>,  <span class="fl">0.5</span>,    <span class="dv">0</span>),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                <span class="fu">c</span>(   <span class="dv">0</span>,    <span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.5</span>),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                <span class="fu">c</span>(   <span class="dv">0</span>,    <span class="dv">0</span>,  <span class="fl">0.5</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>The faces are stored in a list and the coordinates are stored in the list name. The minimum (mx, my, mz) and maximum (Mx, My, Mz) coordinates for the droplet are saved to understand the outer limits around the droplet.</p>
 <div class="cell" data-hash="2024-03-11_aoc_Day18_SurfaceArea_cache/html/unnamed-chunk-5_354c7bc9d97963f8d6a57cf47f404846">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>mx <span class="ot">&lt;-</span> my <span class="ot">&lt;-</span> mz <span class="ot">&lt;-</span> <span class="cn">Inf</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>Mx <span class="ot">&lt;-</span> My <span class="ot">&lt;-</span> Mz <span class="ot">&lt;-</span> <span class="sc">-</span><span class="cn">Inf</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>droplet <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>faces <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (cube <span class="cf">in</span> cubes) {</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>   n <span class="ot">&lt;-</span> n <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>   cell <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">unlist</span>(<span class="fu">str_split</span>(cube, <span class="st">","</span>)))</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>   <span class="cf">if</span> (<span class="fu">sum</span>(cell <span class="sc">==</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">5</span> ,<span class="dv">6</span>)) <span class="sc">==</span> <span class="dv">3</span>) <span class="fu">print</span>(n)</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>   droplet <span class="ot">&lt;-</span> <span class="fu">c</span>(droplet, <span class="fu">list</span>(cell))</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>   </span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>   mx <span class="ot">&lt;-</span> <span class="fu">min</span>(mx, cell[<span class="dv">1</span>])</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>   my <span class="ot">&lt;-</span> <span class="fu">min</span>(my, cell[<span class="dv">2</span>])</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>   mz <span class="ot">&lt;-</span> <span class="fu">min</span>(mz, cell[<span class="dv">3</span>])</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>   </span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>   Mx <span class="ot">&lt;-</span> <span class="fu">max</span>(Mx, cell[<span class="dv">1</span>])</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>   My <span class="ot">&lt;-</span> <span class="fu">max</span>(My, cell[<span class="dv">2</span>])</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>   Mz <span class="ot">&lt;-</span> <span class="fu">max</span>(Mz, cell[<span class="dv">3</span>])</span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>   </span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>   <span class="cf">for</span> (offset <span class="cf">in</span> offsets) {</span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>     k <span class="ot">&lt;-</span><span class="fu">paste</span>(cell[<span class="dv">1</span>] <span class="sc">+</span> offset[<span class="dv">1</span>], cell[<span class="dv">2</span>] <span class="sc">+</span> offset[<span class="dv">2</span>], cell[<span class="dv">3</span>] <span class="sc">+</span> offset[<span class="dv">3</span>], <span class="at">collapse =</span> <span class="st">""</span>)</span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>     <span class="cf">if</span> (<span class="sc">!</span>(k <span class="sc">%in%</span> <span class="fu">names</span>(faces))) {</span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>       faces[[k]] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>     }</span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>     faces[[k]] <span class="ot">&lt;-</span> faces[[k]] <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>   }</span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>mx <span class="ot">&lt;-</span> my <span class="ot">&lt;-</span> mz <span class="ot">&lt;-</span> <span class="cn">Inf</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>Mx <span class="ot">&lt;-</span> My <span class="ot">&lt;-</span> Mz <span class="ot">&lt;-</span> <span class="sc">-</span><span class="cn">Inf</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>droplet <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>faces <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (cube <span class="cf">in</span> cubes) {</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>   n <span class="ot">&lt;-</span> n <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>   cell <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">unlist</span>(<span class="fu">str_split</span>(cube, <span class="st">","</span>)))</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>   <span class="cf">if</span> (<span class="fu">sum</span>(cell <span class="sc">==</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">5</span> ,<span class="dv">6</span>)) <span class="sc">==</span> <span class="dv">3</span>) <span class="fu">print</span>(n)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>   droplet <span class="ot">&lt;-</span> <span class="fu">c</span>(droplet, <span class="fu">list</span>(cell))</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>   </span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>   mx <span class="ot">&lt;-</span> <span class="fu">min</span>(mx, cell[<span class="dv">1</span>])</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>   my <span class="ot">&lt;-</span> <span class="fu">min</span>(my, cell[<span class="dv">2</span>])</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>   mz <span class="ot">&lt;-</span> <span class="fu">min</span>(mz, cell[<span class="dv">3</span>])</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>   </span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>   Mx <span class="ot">&lt;-</span> <span class="fu">max</span>(Mx, cell[<span class="dv">1</span>])</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>   My <span class="ot">&lt;-</span> <span class="fu">max</span>(My, cell[<span class="dv">2</span>])</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>   Mz <span class="ot">&lt;-</span> <span class="fu">max</span>(Mz, cell[<span class="dv">3</span>])</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>   </span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>   <span class="cf">for</span> (offset <span class="cf">in</span> offsets) {</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>     k <span class="ot">&lt;-</span><span class="fu">paste</span>(cell[<span class="dv">1</span>] <span class="sc">+</span> offset[<span class="dv">1</span>], cell[<span class="dv">2</span>] <span class="sc">+</span> offset[<span class="dv">2</span>], cell[<span class="dv">3</span>] <span class="sc">+</span> offset[<span class="dv">3</span>], <span class="at">collapse =</span> <span class="st">""</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>     <span class="cf">if</span> (<span class="sc">!</span>(k <span class="sc">%in%</span> <span class="fu">names</span>(faces))) {</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>       faces[[k]] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>     }</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>     faces[[k]] <span class="ot">&lt;-</span> faces[[k]] <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>   }</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1717</code></pre>
 </div>
 </div>
+<p>A breadth-first search is used to determine which coordinates are part of the air around the droplet (not one of the droplet faces). To begin the search, 1 is subtracted to the minimum coordinates and 1 is added to the maximum coordinates.</p>
 <div class="cell" data-hash="2024-03-11_aoc_Day18_SurfaceArea_cache/html/unnamed-chunk-6_e12db2b3383466df695fb3d65af673bb">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mx <span class="ot">&lt;-</span> mx <span class="sc">-</span> <span class="dv">1</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>my <span class="ot">&lt;-</span> my <span class="sc">-</span> <span class="dv">1</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>mz <span class="ot">&lt;-</span> mz <span class="sc">-</span> <span class="dv">1</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>Mx <span class="ot">&lt;-</span> Mx <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>My <span class="ot">&lt;-</span> My <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>Mz <span class="ot">&lt;-</span> Mz <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mx <span class="ot">&lt;-</span> mx <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>my <span class="ot">&lt;-</span> my <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>mz <span class="ot">&lt;-</span> mz <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>Mx <span class="ot">&lt;-</span> Mx <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>My <span class="ot">&lt;-</span> My <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>Mz <span class="ot">&lt;-</span> Mz <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Using deque with lists</p>
+<p>The <code>collections</code> package is used to create the queue (deque) for storing the coordinates to be explored by the breadth-first search. If the search coordinates are outside the min/max limits then it skips to the next coordinate. If the search coordinates are part of the droplet then it skips to the next coordinate. If the search coordinates are already in <code>air</code> then it skips to the next coordinate otherwise it is appended to the <code>air</code>.</p>
 <div class="cell" data-hash="2024-03-11_aoc_Day18_SurfaceArea_cache/html/unnamed-chunk-7_d27836645b28080f5746f2cf737afc05">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>start <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">deque</span>(<span class="fu">list</span>(<span class="fu">c</span>(mx, my, mz)))</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>air <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">c</span>(mx, my, mz))</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (q<span class="sc">$</span><span class="fu">size</span>() <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  coords <span class="ot">&lt;-</span> <span class="fu">unlist</span>(q<span class="sc">$</span><span class="fu">popleft</span>())</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (d <span class="cf">in</span> offsets) {</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    k <span class="ot">&lt;-</span> <span class="fu">c</span>(coords[<span class="dv">1</span>] <span class="sc">+</span> d[<span class="dv">1</span>] <span class="sc">*</span> <span class="dv">2</span>, coords[<span class="dv">2</span>] <span class="sc">+</span> d[<span class="dv">2</span>] <span class="sc">*</span> <span class="dv">2</span>, coords[<span class="dv">3</span>] <span class="sc">+</span> d[<span class="dv">3</span>] <span class="sc">*</span> <span class="dv">2</span>)</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span>((mx <span class="sc">&lt;=</span> k[<span class="dv">1</span>]) <span class="sc">&amp;</span> (k[<span class="dv">1</span>] <span class="sc">&lt;=</span> Mx) <span class="sc">&amp;</span> (my <span class="sc">&lt;=</span> k[<span class="dv">2</span>]) <span class="sc">&amp;</span> (k[<span class="dv">2</span>] <span class="sc">&lt;=</span> My) <span class="sc">&amp;</span> (mz <span class="sc">&lt;=</span> k[<span class="dv">3</span>]) <span class="sc">&amp;</span> (k[<span class="dv">3</span>] <span class="sc">&lt;=</span> Mz))) {</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>      <span class="cf">next</span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">sum</span>(droplet <span class="sc">%in%</span> <span class="fu">list</span>(k)) <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="cf">next</span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">sum</span>(air <span class="sc">%in%</span> <span class="fu">list</span>(k)) <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="cf">next</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    air <span class="ot">&lt;-</span> <span class="fu">c</span>(air, <span class="fu">list</span>(k))</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    q<span class="sc">$</span><span class="fu">push</span>(<span class="fu">list</span>(k))</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>end <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>start <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>q <span class="ot">&lt;-</span> <span class="fu">deque</span>(<span class="fu">list</span>(<span class="fu">c</span>(mx, my, mz)))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>air <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">c</span>(mx, my, mz))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (q<span class="sc">$</span><span class="fu">size</span>() <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  coords <span class="ot">&lt;-</span> <span class="fu">unlist</span>(q<span class="sc">$</span><span class="fu">popleft</span>())</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (d <span class="cf">in</span> offsets) {</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    k <span class="ot">&lt;-</span> <span class="fu">c</span>(coords[<span class="dv">1</span>] <span class="sc">+</span> d[<span class="dv">1</span>] <span class="sc">*</span> <span class="dv">2</span>, coords[<span class="dv">2</span>] <span class="sc">+</span> d[<span class="dv">2</span>] <span class="sc">*</span> <span class="dv">2</span>, coords[<span class="dv">3</span>] <span class="sc">+</span> d[<span class="dv">3</span>] <span class="sc">*</span> <span class="dv">2</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span>((mx <span class="sc">&lt;=</span> k[<span class="dv">1</span>]) <span class="sc">&amp;</span> (k[<span class="dv">1</span>] <span class="sc">&lt;=</span> Mx) <span class="sc">&amp;</span> (my <span class="sc">&lt;=</span> k[<span class="dv">2</span>]) <span class="sc">&amp;</span> (k[<span class="dv">2</span>] <span class="sc">&lt;=</span> My) <span class="sc">&amp;</span> (mz <span class="sc">&lt;=</span> k[<span class="dv">3</span>]) <span class="sc">&amp;</span> (k[<span class="dv">3</span>] <span class="sc">&lt;=</span> Mz))) {</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>      <span class="cf">next</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">sum</span>(droplet <span class="sc">%in%</span> <span class="fu">list</span>(k)) <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="cf">next</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">sum</span>(air <span class="sc">%in%</span> <span class="fu">list</span>(k)) <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="cf">next</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    air <span class="ot">&lt;-</span> <span class="fu">c</span>(air, <span class="fu">list</span>(k))</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    q<span class="sc">$</span><span class="fu">push</span>(<span class="fu">list</span>(k))</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>end <span class="ot">&lt;-</span> <span class="fu">Sys.time</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>I tried the <code>deque</code> function to see whether it would bring any speed advantage over a manual implementation but did not observe any significant improvement. This breadth-first search took 44 min to run in this implementation.</p>
+<p>A <code>free</code> list is used to contain all of the faces of the air cubes in the same format as for the faces of the droplet cubes. This code is basically a reformatting of the air list.</p>
+<div class="cell" data-hash="2024-03-11_aoc_Day18_SurfaceArea_cache/html/unnamed-chunk-8_a7120561fe681e6168ba8accf74d17fb">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>free <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (a <span class="cf">in</span> air) {</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (d <span class="cf">in</span> offsets) {</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    k <span class="ot">&lt;-</span><span class="fu">paste</span>(a[<span class="dv">1</span>] <span class="sc">+</span> d[<span class="dv">1</span>], a[<span class="dv">2</span>] <span class="sc">+</span> d[<span class="dv">2</span>], a[<span class="dv">3</span>] <span class="sc">+</span> d[<span class="dv">3</span>], <span class="at">collapse =</span> <span class="st">""</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>     <span class="cf">if</span> (<span class="sc">!</span>(k <span class="sc">%in%</span> <span class="fu">names</span>(free))) {</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>       free[[k]] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>     }</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>     free[[k]] <span class="ot">&lt;-</span> free[[k]] <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The surface area of the droplet is then calculated as the cube face coordinates which are in both the droplet(<code>faces</code>) and in the air (<code>free</code>).</p>
+<div class="cell" data-hash="2024-03-11_aoc_Day18_SurfaceArea_cache/html/unnamed-chunk-9_2f85f109b072933f183c7de0543c5868">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>surface_area <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (face <span class="cf">in</span> <span class="fu">names</span>(faces)) {</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (face <span class="sc">%in%</span> <span class="fu">names</span>(free)) {</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    surface_area <span class="ot">&lt;-</span> surface_area <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>surface_area</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2606</code></pre>
+</div>
+</div>
+<p>The total surface area as corrected in Part Two is 2606 units. This is a significant correction from 4536 units calculated in Part One.</p>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>Breadth-first search is used to find the air around a complex droplet surface as a means of calculating surface area. The <code>deque</code> function from the <code>collections</code> package was used to manage the queue which made the code a bit cleaner but didn’t improve the speed at all.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Expand for Session Info
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell" data-hash="2024-03-11_aoc_Day18_SurfaceArea_cache/html/unnamed-chunk-10_9402313c11db68db8b1e8c945dbfd815">
+<div class="cell-output cell-output-stdout">
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.3.2 (2023-10-31 ucrt)
+ os       Windows 10 x64 (build 19045)
+ system   x86_64, mingw32
+ ui       RTerm
+ language (EN)
+ collate  English_United States.utf8
+ ctype    English_United States.utf8
+ tz       America/Chicago
+ date     2024-04-19
+ pandoc   3.1.1 @ C:/Program Files/RStudio/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
+ quarto   1.3.450 @ C:\\PROGRA~1\\RStudio\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
+
+─ Packages ───────────────────────────────────────────────────────────────────
+ ! package     * version date (UTC) lib source
+ P collections * 0.3.7   2023-01-05 [?] CRAN (R 4.3.3)
+ P readr       * 2.1.5   2024-01-10 [?] CRAN (R 4.3.2)
+ P sessioninfo * 1.2.2   2021-12-06 [?] CRAN (R 4.3.2)
+ P stringr     * 1.5.1   2023-11-14 [?] CRAN (R 4.3.2)
+
+ [1] C:/Users/David Zoller/AppData/Local/Temp/RtmpmWTBJB/renv-use-libpath-1f5854ca799
+ [2] C:/Users/David Zoller/Documents/datadavidz.github.io/renv/library/R-4.3/x86_64-w64-mingw32
+ [3] C:/Users/David Zoller/AppData/Local/R/cache/R/renv/sandbox/R-4.3/x86_64-w64-mingw32/7f66d5b3
+
+ P ── Loaded and on-disk path mismatch.
+
+──────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 
 
