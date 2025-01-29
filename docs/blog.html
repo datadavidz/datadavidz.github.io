@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>[datadavidz] - blog</title>
+<title>blog – [datadavidz]</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -47,7 +47,13 @@ ul.task-list li input[type="checkbox"] {
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -56,6 +62,7 @@ ul.task-list li input[type="checkbox"] {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -92,46 +99,73 @@ ul.task-list li input[type="checkbox"] {
   })
   </script>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
+      <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">[datadavidz]</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./blog.html" rel="" target="" aria-current="page">
- <span class="menu-text">Blog</span></a>
+    <a class="nav-link active" href="./blog.html" aria-current="page"> 
+<span class="menu-text">Blog</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/datadavidz" rel="" target=""><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/datadavidz"> <i class="bi bi-github" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com/datadavidz" rel="" target=""><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com/datadavidz"> <i class="bi bi-twitter" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
 </ul>
+          </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
 </div>
-          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -144,7 +178,7 @@ ul.task-list li input[type="checkbox"] {
   </div>
     
   
-  <div class="quarto-title-meta">
+  <div class="quarto-title-meta column-page-left">
 
       
     
@@ -157,7 +191,7 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(33)</span></div><div class="category" data-category="DataViz">DataViz <span class="quarto-category-count">(2)</span></div><div class="category" data-category="MLOps">MLOps <span class="quarto-category-count">(3)</span></div><div class="category" data-category="reticulate">reticulate <span class="quarto-category-count">(2)</span></div><div class="category" data-category="sci-kit">sci-kit <span class="quarto-category-count">(1)</span></div><div class="category" data-category="shiny">shiny <span class="quarto-category-count">(1)</span></div><div class="category" data-category="tidymodels">tidymodels <span class="quarto-category-count">(7)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(34)</span></div><div class="category" data-category="DataViz">DataViz <span class="quarto-category-count">(2)</span></div><div class="category" data-category="MLOps">MLOps <span class="quarto-category-count">(3)</span></div><div class="category" data-category="reticulate">reticulate <span class="quarto-category-count">(2)</span></div><div class="category" data-category="sci-kit">sci-kit <span class="quarto-category-count">(1)</span></div><div class="category" data-category="shiny">shiny <span class="quarto-category-count">(1)</span></div><div class="category" data-category="tidymodels">tidymodels <span class="quarto-category-count">(7)</span></div></div></div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
 
@@ -168,27 +202,56 @@ ul.task-list li input[type="checkbox"] {
 
 
 
+
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-listing-date-sort="1710133200000" data-listing-file-modified-sort="1713537264594" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8">
+<div class="quarto-post image-right" data-index="0" data-listing-date-sort="1723525200000" data-listing-file-modified-sort="1738167612453" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1637">
 <div class="thumbnail">
-<p><a href="./posts/2024-03-11_aoc_Day18_SurfaceArea/2024-03-11_aoc_Day18_SurfaceArea.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2024-08-13_aoc_Day19_DepthFirstSearch/2024-08-13_aoc_Day19_DepthFirstSearch.html" class="no-external"></a></p><a href="./posts/2024-08-13_aoc_Day19_DepthFirstSearch/2024-08-13_aoc_Day19_DepthFirstSearch.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2024-08-13_aoc_Day19_DepthFirstSearch/2024-08-13_aoc_Day19_DepthFirstSearch.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2024-03-11_aoc_Day18_SurfaceArea/2024-03-11_aoc_Day18_SurfaceArea.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 18: Surface Area of Lava Droplet
+<a href="./posts/2024-08-13_aoc_Day19_DepthFirstSearch/2024-08-13_aoc_Day19_DepthFirstSearch.html" class="no-external">Advent of Code Day 19: Depth-First Search</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2024-08-13_aoc_Day19_DepthFirstSearch/2024-08-13_aoc_Day19_DepthFirstSearch.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Calculate surface area of a lava droplet using a breadth-first search approach
+<a href="./posts/2024-08-13_aoc_Day19_DepthFirstSearch/2024-08-13_aoc_Day19_DepthFirstSearch.html" class="no-external">Determine the optimal blueprint for building robots using a depth-first search algorithm</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2024-08-13_aoc_Day19_DepthFirstSearch/2024-08-13_aoc_Day19_DepthFirstSearch.html" class="no-external">
+<div class="listing-date">
+Aug 13, 2024
+</div>
+<div class="listing-author">
+datadavidz
 </div>
 </a>
 </div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-listing-date-sort="1710133200000" data-listing-file-modified-sort="1713537264594" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1434">
+<div class="thumbnail">
+<p><a href="./posts/2024-03-11_aoc_Day18_SurfaceArea/2024-03-11_aoc_Day18_SurfaceArea.html" class="no-external"></a></p><a href="./posts/2024-03-11_aoc_Day18_SurfaceArea/2024-03-11_aoc_Day18_SurfaceArea.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2024-03-11_aoc_Day18_SurfaceArea/2024-03-11_aoc_Day18_SurfaceArea.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2024-03-11_aoc_Day18_SurfaceArea/2024-03-11_aoc_Day18_SurfaceArea.html" class="no-external">Advent of Code Day 18: Surface Area of Lava Droplet</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2024-03-11_aoc_Day18_SurfaceArea/2024-03-11_aoc_Day18_SurfaceArea.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/2024-03-11_aoc_Day18_SurfaceArea/2024-03-11_aoc_Day18_SurfaceArea.html" class="no-external">Calculate surface area of a lava droplet using a breadth-first search approach</a>
+</div>
+</div>
 <div class="metadata">
-<a href="./posts/2024-03-11_aoc_Day18_SurfaceArea/2024-03-11_aoc_Day18_SurfaceArea.html">
+<a href="./posts/2024-03-11_aoc_Day18_SurfaceArea/2024-03-11_aoc_Day18_SurfaceArea.html" class="no-external">
 <div class="listing-date">
 Mar 11, 2024
 </div>
@@ -198,25 +261,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-listing-date-sort="1709186400000" data-listing-file-modified-sort="1709314195927" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10">
+<div class="quarto-post image-right" data-index="2" data-listing-date-sort="1709186400000" data-listing-file-modified-sort="1709314195927" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1840">
 <div class="thumbnail">
-<p><a href="./posts/2024-02-29_aoc_Day17_Tetris/2024-02-29_aoc_Day17_Tetris.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2024-02-29_aoc_Day17_Tetris/2024-02-29_aoc_Day17_Tetris.html" class="no-external"></a></p><a href="./posts/2024-02-29_aoc_Day17_Tetris/2024-02-29_aoc_Day17_Tetris.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2024-02-29_aoc_Day17_Tetris/2024-02-29_aoc_Day17_Tetris.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2024-02-29_aoc_Day17_Tetris/2024-02-29_aoc_Day17_Tetris.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 17: Coordinates as Complex Numbers
+<a href="./posts/2024-02-29_aoc_Day17_Tetris/2024-02-29_aoc_Day17_Tetris.html" class="no-external">Advent of Code Day 17: Coordinates as Complex Numbers</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2024-02-29_aoc_Day17_Tetris/2024-02-29_aoc_Day17_Tetris.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Simulating falling rocks with different shapes (similar to the game Tetris)
+<a href="./posts/2024-02-29_aoc_Day17_Tetris/2024-02-29_aoc_Day17_Tetris.html" class="no-external">Simulating falling rocks with different shapes (similar to the game Tetris)</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2024-02-29_aoc_Day17_Tetris/2024-02-29_aoc_Day17_Tetris.html">
+<a href="./posts/2024-02-29_aoc_Day17_Tetris/2024-02-29_aoc_Day17_Tetris.html" class="no-external">
 <div class="listing-date">
 Feb 29, 2024
 </div>
@@ -226,25 +289,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-listing-date-sort="1697518800000" data-listing-file-modified-sort="1698419641895" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6">
+<div class="quarto-post image-right" data-index="3" data-listing-date-sort="1697518800000" data-listing-file-modified-sort="1698419641895" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1069">
 <div class="thumbnail">
-<p><a href="./posts/2023-10-17_aoc_Day16_BitOps/2023-10-17_aoc_Day16_BitOps.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2023-10-17_aoc_Day16_BitOps/2023-10-17_aoc_Day16_BitOps.html" class="no-external"></a></p><a href="./posts/2023-10-17_aoc_Day16_BitOps/2023-10-17_aoc_Day16_BitOps.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2023-10-17_aoc_Day16_BitOps/2023-10-17_aoc_Day16_BitOps.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-10-17_aoc_Day16_BitOps/2023-10-17_aoc_Day16_BitOps.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 16: BitOps and Hashtables
+<a href="./posts/2023-10-17_aoc_Day16_BitOps/2023-10-17_aoc_Day16_BitOps.html" class="no-external">Advent of Code Day 16: BitOps and Hashtables</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-10-17_aoc_Day16_BitOps/2023-10-17_aoc_Day16_BitOps.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Finding the sequence of valves to open to maximize the pressure relief
+<a href="./posts/2023-10-17_aoc_Day16_BitOps/2023-10-17_aoc_Day16_BitOps.html" class="no-external">Finding the sequence of valves to open to maximize the pressure relief</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-10-17_aoc_Day16_BitOps/2023-10-17_aoc_Day16_BitOps.html">
+<a href="./posts/2023-10-17_aoc_Day16_BitOps/2023-10-17_aoc_Day16_BitOps.html" class="no-external">
 <div class="listing-date">
 Oct 17, 2023
 </div>
@@ -254,25 +317,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-listing-date-sort="1693544400000" data-listing-file-modified-sort="1693589636954" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7">
+<div class="quarto-post image-right" data-index="4" data-listing-date-sort="1693544400000" data-listing-file-modified-sort="1693589636954" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1262">
 <div class="thumbnail">
-<p><a href="./posts/2023-09-01_aoc_Day15_DistressBeacon/2023-09-01_aoc_Day15_DistressBeacon.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2023-09-01_aoc_Day15_DistressBeacon/2023-09-01_aoc_Day15_DistressBeacon.html" class="no-external"></a></p><a href="./posts/2023-09-01_aoc_Day15_DistressBeacon/2023-09-01_aoc_Day15_DistressBeacon.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2023-09-01_aoc_Day15_DistressBeacon/2023-09-01_aoc_Day15_DistressBeacon.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-09-01_aoc_Day15_DistressBeacon/2023-09-01_aoc_Day15_DistressBeacon.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 15: Distress Beacon
+<a href="./posts/2023-09-01_aoc_Day15_DistressBeacon/2023-09-01_aoc_Day15_DistressBeacon.html" class="no-external">Advent of Code Day 15: Distress Beacon</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-09-01_aoc_Day15_DistressBeacon/2023-09-01_aoc_Day15_DistressBeacon.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Locating the position of a distress beacon using Manhattan distance from sensors
+<a href="./posts/2023-09-01_aoc_Day15_DistressBeacon/2023-09-01_aoc_Day15_DistressBeacon.html" class="no-external">Locating the position of a distress beacon using Manhattan distance from sensors</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-09-01_aoc_Day15_DistressBeacon/2023-09-01_aoc_Day15_DistressBeacon.html">
+<a href="./posts/2023-09-01_aoc_Day15_DistressBeacon/2023-09-01_aoc_Day15_DistressBeacon.html" class="no-external">
 <div class="listing-date">
 Sep 1, 2023
 </div>
@@ -282,25 +345,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-listing-date-sort="1691557200000" data-listing-file-modified-sort="1693251132235" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10">
+<div class="quarto-post image-right" data-index="5" data-listing-date-sort="1691557200000" data-listing-file-modified-sort="1693251132235" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1966">
 <div class="thumbnail">
-<p><a href="./posts/2023-08-09_aoc_Day14_FallingSand/2023-08-09_aoc_Day14_FallingSand.html"> <img src="./posts/2023-08-09_aoc_Day14_FallingSand/preview.png" class="thumbnail-image"> </a></p>
+<p><a href="./posts/2023-08-09_aoc_Day14_FallingSand/2023-08-09_aoc_Day14_FallingSand.html" class="no-external"></a></p><a href="./posts/2023-08-09_aoc_Day14_FallingSand/2023-08-09_aoc_Day14_FallingSand.html" class="no-external">
+<p><img loading="lazy" src="./posts/2023-08-09_aoc_Day14_FallingSand/preview.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/2023-08-09_aoc_Day14_FallingSand/2023-08-09_aoc_Day14_FallingSand.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-08-09_aoc_Day14_FallingSand/2023-08-09_aoc_Day14_FallingSand.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 14: Falling Sand
+<a href="./posts/2023-08-09_aoc_Day14_FallingSand/2023-08-09_aoc_Day14_FallingSand.html" class="no-external">Advent of Code Day 14: Falling Sand</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-08-09_aoc_Day14_FallingSand/2023-08-09_aoc_Day14_FallingSand.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Creating a recursive function to track the path of falling sand in a cavern
+<a href="./posts/2023-08-09_aoc_Day14_FallingSand/2023-08-09_aoc_Day14_FallingSand.html" class="no-external">Creating a recursive function to track the path of falling sand in a cavern</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-08-09_aoc_Day14_FallingSand/2023-08-09_aoc_Day14_FallingSand.html">
+<a href="./posts/2023-08-09_aoc_Day14_FallingSand/2023-08-09_aoc_Day14_FallingSand.html" class="no-external">
 <div class="listing-date">
 Aug 9, 2023
 </div>
@@ -310,25 +373,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="5" data-listing-date-sort="1690952400000" data-listing-file-modified-sort="1691417954517" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6">
+<div class="quarto-post image-right" data-index="6" data-listing-date-sort="1690952400000" data-listing-file-modified-sort="1691417954517" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1075">
 <div class="thumbnail">
-<p><a href="./posts/2023-08-02_aoc_Day13_Recursion/2023-08-02_aoc_Day13_Recursion.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2023-08-02_aoc_Day13_Recursion/2023-08-02_aoc_Day13_Recursion.html" class="no-external"></a></p><a href="./posts/2023-08-02_aoc_Day13_Recursion/2023-08-02_aoc_Day13_Recursion.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2023-08-02_aoc_Day13_Recursion/2023-08-02_aoc_Day13_Recursion.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-08-02_aoc_Day13_Recursion/2023-08-02_aoc_Day13_Recursion.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 13: Recursion
+<a href="./posts/2023-08-02_aoc_Day13_Recursion/2023-08-02_aoc_Day13_Recursion.html" class="no-external">Advent of Code Day 13: Recursion</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-08-02_aoc_Day13_Recursion/2023-08-02_aoc_Day13_Recursion.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Creating a recursive function to compare nested lists.
+<a href="./posts/2023-08-02_aoc_Day13_Recursion/2023-08-02_aoc_Day13_Recursion.html" class="no-external">Creating a recursive function to compare nested lists.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-08-02_aoc_Day13_Recursion/2023-08-02_aoc_Day13_Recursion.html">
+<a href="./posts/2023-08-02_aoc_Day13_Recursion/2023-08-02_aoc_Day13_Recursion.html" class="no-external">
 <div class="listing-date">
 Aug 2, 2023
 </div>
@@ -338,25 +401,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="6" data-listing-date-sort="1690520400000" data-listing-file-modified-sort="1690899611229" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12">
+<div class="quarto-post image-right" data-index="7" data-listing-date-sort="1690520400000" data-listing-file-modified-sort="1690899611229" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2219">
 <div class="thumbnail">
-<p><a href="./posts/2023-07-28_aoc_Day12_BreadthFirst/2023-07-28_aoc_Day12_BreadthFirst.html"> <p class="card-img-top"><img src="posts\2023-07-28_aoc_Day12_BreadthFirst\2023-07-28_aoc_Day12_BreadthFirst_files\figure-html\unnamed-chunk-16-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2023-07-28_aoc_Day12_BreadthFirst/2023-07-28_aoc_Day12_BreadthFirst.html" class="no-external"></a></p><a href="./posts/2023-07-28_aoc_Day12_BreadthFirst/2023-07-28_aoc_Day12_BreadthFirst.html" class="no-external">
+<p class="card-img-top"><img src="posts\2023-07-28_aoc_Day12_BreadthFirst\2023-07-28_aoc_Day12_BreadthFirst_files\figure-html\unnamed-chunk-16-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2023-07-28_aoc_Day12_BreadthFirst/2023-07-28_aoc_Day12_BreadthFirst.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-07-28_aoc_Day12_BreadthFirst/2023-07-28_aoc_Day12_BreadthFirst.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 12: Breadth-First Search
+<a href="./posts/2023-07-28_aoc_Day12_BreadthFirst/2023-07-28_aoc_Day12_BreadthFirst.html" class="no-external">Advent of Code Day 12: Breadth-First Search</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-07-28_aoc_Day12_BreadthFirst/2023-07-28_aoc_Day12_BreadthFirst.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Finding the best path using a breadth-first search algorithm.
+<a href="./posts/2023-07-28_aoc_Day12_BreadthFirst/2023-07-28_aoc_Day12_BreadthFirst.html" class="no-external">Finding the best path using a breadth-first search algorithm.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-07-28_aoc_Day12_BreadthFirst/2023-07-28_aoc_Day12_BreadthFirst.html">
+<a href="./posts/2023-07-28_aoc_Day12_BreadthFirst/2023-07-28_aoc_Day12_BreadthFirst.html" class="no-external">
 <div class="listing-date">
 Jul 28, 2023
 </div>
@@ -366,25 +429,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="7" data-listing-date-sort="1690261200000" data-listing-file-modified-sort="1690314759030" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9">
+<div class="quarto-post image-right" data-index="8" data-listing-date-sort="1690261200000" data-listing-file-modified-sort="1690314759030" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1667">
 <div class="thumbnail">
-<p><a href="./posts/2023-07-25_aoc_Day11_MonkeyBusiness/2023-07-25_aoc_Day11_MonkeyBusiness.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2023-07-25_aoc_Day11_MonkeyBusiness/2023-07-25_aoc_Day11_MonkeyBusiness.html" class="no-external"></a></p><a href="./posts/2023-07-25_aoc_Day11_MonkeyBusiness/2023-07-25_aoc_Day11_MonkeyBusiness.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2023-07-25_aoc_Day11_MonkeyBusiness/2023-07-25_aoc_Day11_MonkeyBusiness.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-07-25_aoc_Day11_MonkeyBusiness/2023-07-25_aoc_Day11_MonkeyBusiness.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 11: Monkey Business
+<a href="./posts/2023-07-25_aoc_Day11_MonkeyBusiness/2023-07-25_aoc_Day11_MonkeyBusiness.html" class="no-external">Advent of Code Day 11: Monkey Business</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-07-25_aoc_Day11_MonkeyBusiness/2023-07-25_aoc_Day11_MonkeyBusiness.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Monkeys have taken my items and we need to determine how much monkey business is going on.
+<a href="./posts/2023-07-25_aoc_Day11_MonkeyBusiness/2023-07-25_aoc_Day11_MonkeyBusiness.html" class="no-external">Monkeys have taken my items and we need to determine how much monkey business is going on.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-07-25_aoc_Day11_MonkeyBusiness/2023-07-25_aoc_Day11_MonkeyBusiness.html">
+<a href="./posts/2023-07-25_aoc_Day11_MonkeyBusiness/2023-07-25_aoc_Day11_MonkeyBusiness.html" class="no-external">
 <div class="listing-date">
 Jul 25, 2023
 </div>
@@ -394,25 +457,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="8" data-listing-date-sort="1689656400000" data-listing-file-modified-sort="1689945592349" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5">
+<div class="quarto-post image-right" data-index="9" data-listing-date-sort="1689656400000" data-listing-file-modified-sort="1689945592349" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="989">
 <div class="thumbnail">
-<p><a href="./posts/2023-07-18_aoc_Day10_HiddenMessage/2023-07-18_aoc_Day10_HiddenMessage.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2023-07-18_aoc_Day10_HiddenMessage/2023-07-18_aoc_Day10_HiddenMessage.html" class="no-external"></a></p><a href="./posts/2023-07-18_aoc_Day10_HiddenMessage/2023-07-18_aoc_Day10_HiddenMessage.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2023-07-18_aoc_Day10_HiddenMessage/2023-07-18_aoc_Day10_HiddenMessage.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-07-18_aoc_Day10_HiddenMessage/2023-07-18_aoc_Day10_HiddenMessage.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 10: Hidden Message
+<a href="./posts/2023-07-18_aoc_Day10_HiddenMessage/2023-07-18_aoc_Day10_HiddenMessage.html" class="no-external">Advent of Code Day 10: Hidden Message</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-07-18_aoc_Day10_HiddenMessage/2023-07-18_aoc_Day10_HiddenMessage.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Following a series of instructions to display a hidden series of letters
+<a href="./posts/2023-07-18_aoc_Day10_HiddenMessage/2023-07-18_aoc_Day10_HiddenMessage.html" class="no-external">Following a series of instructions to display a hidden series of letters</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-07-18_aoc_Day10_HiddenMessage/2023-07-18_aoc_Day10_HiddenMessage.html">
+<a href="./posts/2023-07-18_aoc_Day10_HiddenMessage/2023-07-18_aoc_Day10_HiddenMessage.html" class="no-external">
 <div class="listing-date">
 Jul 18, 2023
 </div>
@@ -422,25 +485,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="9" data-listing-date-sort="1688965200000" data-listing-file-modified-sort="1689613004512" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11">
+<div class="quarto-post image-right" data-index="10" data-listing-date-sort="1688965200000" data-listing-file-modified-sort="1689613004512" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2070">
 <div class="thumbnail">
-<p><a href="./posts/2023-07-10_aoc_Day09_Tracking/2023-07-10_aoc_Day09_Tracking.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2023-07-10_aoc_Day09_Tracking/2023-07-10_aoc_Day09_Tracking.html" class="no-external"></a></p><a href="./posts/2023-07-10_aoc_Day09_Tracking/2023-07-10_aoc_Day09_Tracking.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2023-07-10_aoc_Day09_Tracking/2023-07-10_aoc_Day09_Tracking.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-07-10_aoc_Day09_Tracking/2023-07-10_aoc_Day09_Tracking.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 9: Tracking
+<a href="./posts/2023-07-10_aoc_Day09_Tracking/2023-07-10_aoc_Day09_Tracking.html" class="no-external">Advent of Code Day 9: Tracking</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-07-10_aoc_Day09_Tracking/2023-07-10_aoc_Day09_Tracking.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Creating a map to track a “head” knot as it moves according to a series of instructions
+<a href="./posts/2023-07-10_aoc_Day09_Tracking/2023-07-10_aoc_Day09_Tracking.html" class="no-external">Creating a map to track a “head” knot as it moves according to a series of instructions</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-07-10_aoc_Day09_Tracking/2023-07-10_aoc_Day09_Tracking.html">
+<a href="./posts/2023-07-10_aoc_Day09_Tracking/2023-07-10_aoc_Day09_Tracking.html" class="no-external">
 <div class="listing-date">
 Jul 10, 2023
 </div>
@@ -450,25 +513,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="10" data-listing-date-sort="1684299600000" data-listing-file-modified-sort="1686056882181" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8">
+<div class="quarto-post image-right" data-index="11" data-listing-date-sort="1684299600000" data-listing-file-modified-sort="1686056882181" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1474">
 <div class="thumbnail">
-<p><a href="./posts/2023-05-17_aoc_Day08_Matrices/2023-05-17_aoc_Day08_Matrices.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2023-05-17_aoc_Day08_Matrices/2023-05-17_aoc_Day08_Matrices.html" class="no-external"></a></p><a href="./posts/2023-05-17_aoc_Day08_Matrices/2023-05-17_aoc_Day08_Matrices.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2023-05-17_aoc_Day08_Matrices/2023-05-17_aoc_Day08_Matrices.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-05-17_aoc_Day08_Matrices/2023-05-17_aoc_Day08_Matrices.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 8: Matrices
+<a href="./posts/2023-05-17_aoc_Day08_Matrices/2023-05-17_aoc_Day08_Matrices.html" class="no-external">Advent of Code Day 8: Matrices</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-05-17_aoc_Day08_Matrices/2023-05-17_aoc_Day08_Matrices.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Assessing a grid of trees by performing positional calculations on a representative matrix
+<a href="./posts/2023-05-17_aoc_Day08_Matrices/2023-05-17_aoc_Day08_Matrices.html" class="no-external">Assessing a grid of trees by performing positional calculations on a representative matrix</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-05-17_aoc_Day08_Matrices/2023-05-17_aoc_Day08_Matrices.html">
+<a href="./posts/2023-05-17_aoc_Day08_Matrices/2023-05-17_aoc_Day08_Matrices.html" class="no-external">
 <div class="listing-date">
 May 17, 2023
 </div>
@@ -478,25 +541,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="11" data-listing-date-sort="1683262800000" data-listing-file-modified-sort="1683581552497" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5">
+<div class="quarto-post image-right" data-index="12" data-listing-date-sort="1683262800000" data-listing-file-modified-sort="1683581552497" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="949">
 <div class="thumbnail">
-<p><a href="./posts/2023-05-05_aoc_Day07_Filepaths/2023-05-05_aoc_Day07_Filepaths.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2023-05-05_aoc_Day07_Filepaths/2023-05-05_aoc_Day07_Filepaths.html" class="no-external"></a></p><a href="./posts/2023-05-05_aoc_Day07_Filepaths/2023-05-05_aoc_Day07_Filepaths.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2023-05-05_aoc_Day07_Filepaths/2023-05-05_aoc_Day07_Filepaths.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-05-05_aoc_Day07_Filepaths/2023-05-05_aoc_Day07_Filepaths.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 7: Tracking file paths
+<a href="./posts/2023-05-05_aoc_Day07_Filepaths/2023-05-05_aoc_Day07_Filepaths.html" class="no-external">Advent of Code Day 7: Tracking file paths</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-05-05_aoc_Day07_Filepaths/2023-05-05_aoc_Day07_Filepaths.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Track the directory paths and file sizes from a series of OS commands
+<a href="./posts/2023-05-05_aoc_Day07_Filepaths/2023-05-05_aoc_Day07_Filepaths.html" class="no-external">Track the directory paths and file sizes from a series of OS commands</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-05-05_aoc_Day07_Filepaths/2023-05-05_aoc_Day07_Filepaths.html">
+<a href="./posts/2023-05-05_aoc_Day07_Filepaths/2023-05-05_aoc_Day07_Filepaths.html" class="no-external">
 <div class="listing-date">
 May 5, 2023
 </div>
@@ -506,25 +569,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="12" data-listing-date-sort="1682398800000" data-listing-file-modified-sort="1683581666433" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4">
+<div class="quarto-post image-right" data-index="13" data-listing-date-sort="1682398800000" data-listing-file-modified-sort="1683581666433" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="678">
 <div class="thumbnail">
-<p><a href="./posts/2023-04-25_aoc_Day06_Decode/2023-04-25_aoc_Day06_Decode.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2023-04-25_aoc_Day06_Decode/2023-04-25_aoc_Day06_Decode.html" class="no-external"></a></p><a href="./posts/2023-04-25_aoc_Day06_Decode/2023-04-25_aoc_Day06_Decode.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2023-04-25_aoc_Day06_Decode/2023-04-25_aoc_Day06_Decode.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-04-25_aoc_Day06_Decode/2023-04-25_aoc_Day06_Decode.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 6: Decoding Signals
+<a href="./posts/2023-04-25_aoc_Day06_Decode/2023-04-25_aoc_Day06_Decode.html" class="no-external">Advent of Code Day 6: Decoding Signals</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-04-25_aoc_Day06_Decode/2023-04-25_aoc_Day06_Decode.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Find a start-of-packet marker in a string of characters
+<a href="./posts/2023-04-25_aoc_Day06_Decode/2023-04-25_aoc_Day06_Decode.html" class="no-external">Find a start-of-packet marker in a string of characters</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-04-25_aoc_Day06_Decode/2023-04-25_aoc_Day06_Decode.html">
+<a href="./posts/2023-04-25_aoc_Day06_Decode/2023-04-25_aoc_Day06_Decode.html" class="no-external">
 <div class="listing-date">
 Apr 25, 2023
 </div>
@@ -534,25 +597,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="13" data-listing-date-sort="1681448400000" data-listing-file-modified-sort="1681494582845" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7">
+<div class="quarto-post image-right" data-index="14" data-listing-date-sort="1681448400000" data-listing-file-modified-sort="1681494582845" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1201">
 <div class="thumbnail">
-<p><a href="./posts/2023-04-14_aoc_Day05_Stacks/2023-04-14_aoc_Day05_Stacks.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2023-04-14_aoc_Day05_Stacks/2023-04-14_aoc_Day05_Stacks.html" class="no-external"></a></p><a href="./posts/2023-04-14_aoc_Day05_Stacks/2023-04-14_aoc_Day05_Stacks.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2023-04-14_aoc_Day05_Stacks/2023-04-14_aoc_Day05_Stacks.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-04-14_aoc_Day05_Stacks/2023-04-14_aoc_Day05_Stacks.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 5: Stacking Crates
+<a href="./posts/2023-04-14_aoc_Day05_Stacks/2023-04-14_aoc_Day05_Stacks.html" class="no-external">Advent of Code Day 5: Stacking Crates</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-04-14_aoc_Day05_Stacks/2023-04-14_aoc_Day05_Stacks.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Using base R to read a custom, input file format and manipulate the data in lists
+<a href="./posts/2023-04-14_aoc_Day05_Stacks/2023-04-14_aoc_Day05_Stacks.html" class="no-external">Using base R to read a custom, input file format and manipulate the data in lists</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-04-14_aoc_Day05_Stacks/2023-04-14_aoc_Day05_Stacks.html">
+<a href="./posts/2023-04-14_aoc_Day05_Stacks/2023-04-14_aoc_Day05_Stacks.html" class="no-external">
 <div class="listing-date">
 Apr 14, 2023
 </div>
@@ -562,25 +625,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="14" data-listing-date-sort="1675749600000" data-listing-file-modified-sort="1675810340710" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3">
+<div class="quarto-post image-right" data-index="15" data-listing-date-sort="1675749600000" data-listing-file-modified-sort="1675810340710" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="548">
 <div class="thumbnail">
-<p><a href="./posts/2023-02-07_aoc_Day04_Separate/2023-02-07_aoc_Day04_Separate.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2023-02-07_aoc_Day04_Separate/2023-02-07_aoc_Day04_Separate.html" class="no-external"></a></p><a href="./posts/2023-02-07_aoc_Day04_Separate/2023-02-07_aoc_Day04_Separate.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2023-02-07_aoc_Day04_Separate/2023-02-07_aoc_Day04_Separate.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-02-07_aoc_Day04_Separate/2023-02-07_aoc_Day04_Separate.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 4: Separate
+<a href="./posts/2023-02-07_aoc_Day04_Separate/2023-02-07_aoc_Day04_Separate.html" class="no-external">Advent of Code Day 4: Separate</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-02-07_aoc_Day04_Separate/2023-02-07_aoc_Day04_Separate.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Contiguous sections to be cleaned by the elves are parsed from the input file to identify overlapping assignments.
+<a href="./posts/2023-02-07_aoc_Day04_Separate/2023-02-07_aoc_Day04_Separate.html" class="no-external">Contiguous sections to be cleaned by the elves are parsed from the input file to identify overlapping assignments.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-02-07_aoc_Day04_Separate/2023-02-07_aoc_Day04_Separate.html">
+<a href="./posts/2023-02-07_aoc_Day04_Separate/2023-02-07_aoc_Day04_Separate.html" class="no-external">
 <div class="listing-date">
 Feb 7, 2023
 </div>
@@ -590,25 +653,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="15" data-listing-date-sort="1674453600000" data-listing-file-modified-sort="1675366381651" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5">
+<div class="quarto-post image-right" data-index="16" data-listing-date-sort="1674453600000" data-listing-file-modified-sort="1675366381651" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="832">
 <div class="thumbnail">
-<p><a href="./posts/2023-01-23_aoc_Day03_Strings/2023-01-23_aoc_Day03_Strings.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2023-01-23_aoc_Day03_Strings/2023-01-23_aoc_Day03_Strings.html" class="no-external"></a></p><a href="./posts/2023-01-23_aoc_Day03_Strings/2023-01-23_aoc_Day03_Strings.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2023-01-23_aoc_Day03_Strings/2023-01-23_aoc_Day03_Strings.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-01-23_aoc_Day03_Strings/2023-01-23_aoc_Day03_Strings.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 3: Manipulating Strings
+<a href="./posts/2023-01-23_aoc_Day03_Strings/2023-01-23_aoc_Day03_Strings.html" class="no-external">Advent of Code Day 3: Manipulating Strings</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-01-23_aoc_Day03_Strings/2023-01-23_aoc_Day03_Strings.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Lists of elf items are contained within strings which are manipulated with the <code>stringr</code> package to determine loading priorities.
+<a href="./posts/2023-01-23_aoc_Day03_Strings/2023-01-23_aoc_Day03_Strings.html" class="no-external">Lists of elf items are contained within strings which are manipulated with the <code>stringr</code> package to determine loading priorities.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-01-23_aoc_Day03_Strings/2023-01-23_aoc_Day03_Strings.html">
+<a href="./posts/2023-01-23_aoc_Day03_Strings/2023-01-23_aoc_Day03_Strings.html" class="no-external">
 <div class="listing-date">
 Jan 23, 2023
 </div>
@@ -618,25 +681,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="16" data-listing-date-sort="1673416800000" data-listing-file-modified-sort="1674141227585" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5">
+<div class="quarto-post image-right" data-index="17" data-listing-date-sort="1673416800000" data-listing-file-modified-sort="1674141227585" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="932">
 <div class="thumbnail">
-<p><a href="./posts/2023-01-11_aoc_Day02_Lookup/2023-01-11_aoc_Day02_Lookup.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2023-01-11_aoc_Day02_Lookup/2023-01-11_aoc_Day02_Lookup.html" class="no-external"></a></p><a href="./posts/2023-01-11_aoc_Day02_Lookup/2023-01-11_aoc_Day02_Lookup.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2023-01-11_aoc_Day02_Lookup/2023-01-11_aoc_Day02_Lookup.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-01-11_aoc_Day02_Lookup/2023-01-11_aoc_Day02_Lookup.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 2: Using Lookup Tables
+<a href="./posts/2023-01-11_aoc_Day02_Lookup/2023-01-11_aoc_Day02_Lookup.html" class="no-external">Advent of Code Day 2: Using Lookup Tables</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-01-11_aoc_Day02_Lookup/2023-01-11_aoc_Day02_Lookup.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Rules are defined in lookup tables and joined to the input dataset in order to calculate a score for a Rocks-Paper-Scissors game.
+<a href="./posts/2023-01-11_aoc_Day02_Lookup/2023-01-11_aoc_Day02_Lookup.html" class="no-external">Rules are defined in lookup tables and joined to the input dataset in order to calculate a score for a Rocks-Paper-Scissors game.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-01-11_aoc_Day02_Lookup/2023-01-11_aoc_Day02_Lookup.html">
+<a href="./posts/2023-01-11_aoc_Day02_Lookup/2023-01-11_aoc_Day02_Lookup.html" class="no-external">
 <div class="listing-date">
 Jan 11, 2023
 </div>
@@ -646,25 +709,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="17" data-listing-date-sort="1672898400000" data-listing-file-modified-sort="1672958381878" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4">
+<div class="quarto-post image-right" data-index="18" data-listing-date-sort="1672898400000" data-listing-file-modified-sort="1672958381878" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="700">
 <div class="thumbnail">
-<p><a href="./posts/2023-01-05_aoc_Day01_Lists/2023-01-05_aoc_Day01_Lists.html"> <p class="card-img-top"><img src="posts\2023-01-05_aoc_Day01_Lists\2023-01-05_aoc_Day01_Lists_files\figure-html\unnamed-chunk-7-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2023-01-05_aoc_Day01_Lists/2023-01-05_aoc_Day01_Lists.html" class="no-external"></a></p><a href="./posts/2023-01-05_aoc_Day01_Lists/2023-01-05_aoc_Day01_Lists.html" class="no-external">
+<p class="card-img-top"><img src="posts\2023-01-05_aoc_Day01_Lists\2023-01-05_aoc_Day01_Lists_files\figure-html\unnamed-chunk-7-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2023-01-05_aoc_Day01_Lists/2023-01-05_aoc_Day01_Lists.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2023-01-05_aoc_Day01_Lists/2023-01-05_aoc_Day01_Lists.html">
 <h3 class="no-anchor listing-title">
-Advent of Code Day 1: Working with Lists
+<a href="./posts/2023-01-05_aoc_Day01_Lists/2023-01-05_aoc_Day01_Lists.html" class="no-external">Advent of Code Day 1: Working with Lists</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2023-01-05_aoc_Day01_Lists/2023-01-05_aoc_Day01_Lists.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-An input file is transformed into a structured list to enable calculations on the dataset.
+<a href="./posts/2023-01-05_aoc_Day01_Lists/2023-01-05_aoc_Day01_Lists.html" class="no-external">An input file is transformed into a structured list to enable calculations on the dataset.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2023-01-05_aoc_Day01_Lists/2023-01-05_aoc_Day01_Lists.html">
+<a href="./posts/2023-01-05_aoc_Day01_Lists/2023-01-05_aoc_Day01_Lists.html" class="no-external">
 <div class="listing-date">
 Jan 5, 2023
 </div>
@@ -674,19 +737,19 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="18" data-categories="shiny,MLOps" data-listing-date-sort="1669960800000" data-listing-file-modified-sort="1670363786094" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7">
+<div class="quarto-post image-right" data-index="19" data-categories="shiny,MLOps" data-listing-date-sort="1669960800000" data-listing-file-modified-sort="1670363786094" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1301">
 <div class="thumbnail">
-<p><a href="./posts/2022-12-02_SimpleUIConcreteAPI/2022-12-02_SimpleUIConcreteAPI.html"> <p class="card-img-top"><img src="posts\2022-12-02_SimpleUIConcreteAPI\SimpleUIConcreteAPI.PNG"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2022-12-02_SimpleUIConcreteAPI/2022-12-02_SimpleUIConcreteAPI.html" class="no-external"></a></p><a href="./posts/2022-12-02_SimpleUIConcreteAPI/2022-12-02_SimpleUIConcreteAPI.html" class="no-external">
+<p class="card-img-top"><img src="posts\2022-12-02_SimpleUIConcreteAPI\SimpleUIConcreteAPI.PNG"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2022-12-02_SimpleUIConcreteAPI/2022-12-02_SimpleUIConcreteAPI.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2022-12-02_SimpleUIConcreteAPI/2022-12-02_SimpleUIConcreteAPI.html">
 <h3 class="no-anchor listing-title">
-A Rudimentary Shiny App for the Concrete API
+<a href="./posts/2022-12-02_SimpleUIConcreteAPI/2022-12-02_SimpleUIConcreteAPI.html" class="no-external">A Rudimentary Shiny App for the Concrete API</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2022-12-02_SimpleUIConcreteAPI/2022-12-02_SimpleUIConcreteAPI.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('shiny'); return false;">
 shiny
@@ -695,14 +758,12 @@ shiny
 MLOps
 </div>
 </div>
-<a href="./posts/2022-12-02_SimpleUIConcreteAPI/2022-12-02_SimpleUIConcreteAPI.html">
 <div class="listing-description">
-A simple, user interface for requesting predictions from the Concrete API has been built using Shiny.
+<a href="./posts/2022-12-02_SimpleUIConcreteAPI/2022-12-02_SimpleUIConcreteAPI.html" class="no-external">A simple, user interface for requesting predictions from the Concrete API has been built using Shiny.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-12-02_SimpleUIConcreteAPI/2022-12-02_SimpleUIConcreteAPI.html">
+<a href="./posts/2022-12-02_SimpleUIConcreteAPI/2022-12-02_SimpleUIConcreteAPI.html" class="no-external">
 <div class="listing-date">
 Dec 2, 2022
 </div>
@@ -712,19 +773,19 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="19" data-categories="tidymodels,MLOps" data-listing-date-sort="1666328400000" data-listing-file-modified-sort="1667596627575" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9">
+<div class="quarto-post image-right" data-index="20" data-categories="tidymodels,MLOps" data-listing-date-sort="1666328400000" data-listing-file-modified-sort="1667596627575" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1606">
 <div class="thumbnail">
-<p><a href="./posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html"> <p class="card-img-top"><img src="posts\2022-10-21_ConcreteAPI\ConcreteAPI_DOCS.PNG"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html" class="no-external"></a></p><a href="./posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html" class="no-external">
+<p class="card-img-top"><img src="posts\2022-10-21_ConcreteAPI\ConcreteAPI_DOCS.PNG"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html">
 <h3 class="no-anchor listing-title">
-Create a Dockerized API Running on an AWS EC2 instance
+<a href="./posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html" class="no-external">Create a Dockerized API Running on an AWS EC2 instance</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('tidymodels'); return false;">
 tidymodels
@@ -733,14 +794,12 @@ tidymodels
 MLOps
 </div>
 </div>
-<a href="./posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html">
 <div class="listing-description">
-An Application Programming Interface (API) to predict concrete compressive strength is implemented in the cloud using an AWS EC2 instance.
+<a href="./posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html" class="no-external">An Application Programming Interface (API) to predict concrete compressive strength is implemented in the cloud using an AWS EC2 instance.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html">
+<a href="./posts/2022-10-21_ConcreteAPI/2022-10-21_ConcreteAPI.html" class="no-external">
 <div class="listing-date">
 Oct 21, 2022
 </div>
@@ -750,19 +809,19 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="20" data-categories="tidymodels,MLOps" data-listing-date-sort="1665723600000" data-listing-file-modified-sort="1666206911802" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4">
+<div class="quarto-post image-right" data-index="21" data-categories="tidymodels,MLOps" data-listing-date-sort="1665723600000" data-listing-file-modified-sort="1666206911802" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="751">
 <div class="thumbnail">
-<p><a href="./posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html" class="no-external"></a></p><a href="./posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html">
 <h3 class="no-anchor listing-title">
-Pin a Vetiver Model to an AWS S3 Container
+<a href="./posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html" class="no-external">Pin a Vetiver Model to an AWS S3 Container</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('tidymodels'); return false;">
 tidymodels
@@ -771,14 +830,12 @@ tidymodels
 MLOps
 </div>
 </div>
-<a href="./posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html">
 <div class="listing-description">
-An XGBoost model for predicting concrete strength is transformed into a deployable model object and uploaded to an AWS S3 container.
+<a href="./posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html" class="no-external">An XGBoost model for predicting concrete strength is transformed into a deployable model object and uploaded to an AWS S3 container.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html">
+<a href="./posts/2022-10-14_ConcreteS3/2022-10-14_ConcreteS3.html" class="no-external">
 <div class="listing-date">
 Oct 14, 2022
 </div>
@@ -788,19 +845,19 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="21" data-categories="sci-kit,reticulate" data-listing-date-sort="1665637200000" data-listing-file-modified-sort="1662153150991" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6">
+<div class="quarto-post image-right" data-index="22" data-categories="sci-kit,reticulate" data-listing-date-sort="1665637200000" data-listing-file-modified-sort="1662153150991" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1171">
 <div class="thumbnail">
-<p><a href="./posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html"> <p class="card-img-top"><img src="posts\2022-10-13_ConcreteGP\2022-10-13_ConcreteGP_files\figure-html\unnamed-chunk-10-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html" class="no-external"></a></p><a href="./posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html" class="no-external">
+<p class="card-img-top"><img src="posts\2022-10-13_ConcreteGP\2022-10-13_ConcreteGP_files\figure-html\unnamed-chunk-10-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html">
 <h3 class="no-anchor listing-title">
-Gaussian Process Model for the Concrete Dataset
+<a href="./posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html" class="no-external">Gaussian Process Model for the Concrete Dataset</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('sci-kit'); return false;">
 sci-kit
@@ -809,14 +866,12 @@ sci-kit
 reticulate
 </div>
 </div>
-<a href="./posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html">
 <div class="listing-description">
-A GP model to predict the compressive strength of concrete is built using R and Python.
+<a href="./posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html" class="no-external">A GP model to predict the compressive strength of concrete is built using R and Python.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html">
+<a href="./posts/2022-10-13_ConcreteGP/2022-10-13_ConcreteGP.html" class="no-external">
 <div class="listing-date">
 Oct 13, 2022
 </div>
@@ -826,32 +881,30 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="22" data-categories="tidymodels" data-listing-date-sort="1665118800000" data-listing-file-modified-sort="1662145996245" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5">
+<div class="quarto-post image-right" data-index="23" data-categories="tidymodels" data-listing-date-sort="1665118800000" data-listing-file-modified-sort="1662145996245" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="914">
 <div class="thumbnail">
-<p><a href="./posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html"> <p class="card-img-top"><img src="posts\2022-10-07_ConcreteSummary\2022-10-07_ConcreteSummary_files\figure-html\unnamed-chunk-5-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html" class="no-external"></a></p><a href="./posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html" class="no-external">
+<p class="card-img-top"><img src="posts\2022-10-07_ConcreteSummary\2022-10-07_ConcreteSummary_files\figure-html\unnamed-chunk-5-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html">
 <h3 class="no-anchor listing-title">
-Summary of Concrete Models
+<a href="./posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html" class="no-external">Summary of Concrete Models</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('tidymodels'); return false;">
 tidymodels
 </div>
 </div>
-<a href="./posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html">
 <div class="listing-description">
-A comparison of the predictive performance and speed for the different modeling approaches.
+<a href="./posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html" class="no-external">A comparison of the predictive performance and speed for the different modeling approaches.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html">
+<a href="./posts/2022-10-07_ConcreteSummary/2022-10-07_ConcreteSummary.html" class="no-external">
 <div class="listing-date">
 Oct 7, 2022
 </div>
@@ -861,32 +914,30 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="23" data-categories="tidymodels" data-listing-date-sort="1664600400000" data-listing-file-modified-sort="1662145231197" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6">
+<div class="quarto-post image-right" data-index="24" data-categories="tidymodels" data-listing-date-sort="1664600400000" data-listing-file-modified-sort="1662145231197" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1001">
 <div class="thumbnail">
-<p><a href="./posts/2022-10-01_ConcreteRF/2022-10-01_ConcreteRF.html"> <p class="card-img-top"><img src="posts\2022-10-01_ConcreteRF\2022-10-01_ConcreteRF_files\figure-html\unnamed-chunk-8-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2022-10-01_ConcreteRF/2022-10-01_ConcreteRF.html" class="no-external"></a></p><a href="./posts/2022-10-01_ConcreteRF/2022-10-01_ConcreteRF.html" class="no-external">
+<p class="card-img-top"><img src="posts\2022-10-01_ConcreteRF\2022-10-01_ConcreteRF_files\figure-html\unnamed-chunk-8-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2022-10-01_ConcreteRF/2022-10-01_ConcreteRF.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2022-10-01_ConcreteRF/2022-10-01_ConcreteRF.html">
 <h3 class="no-anchor listing-title">
-Random Forest Model for Concrete Dataset
+<a href="./posts/2022-10-01_ConcreteRF/2022-10-01_ConcreteRF.html" class="no-external">Random Forest Model for Concrete Dataset</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2022-10-01_ConcreteRF/2022-10-01_ConcreteRF.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('tidymodels'); return false;">
 tidymodels
 </div>
 </div>
-<a href="./posts/2022-10-01_ConcreteRF/2022-10-01_ConcreteRF.html">
 <div class="listing-description">
-A predictive model for compressive strength of concrete is built using a random forest algorithm.
+<a href="./posts/2022-10-01_ConcreteRF/2022-10-01_ConcreteRF.html" class="no-external">A predictive model for compressive strength of concrete is built using a random forest algorithm.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-10-01_ConcreteRF/2022-10-01_ConcreteRF.html">
+<a href="./posts/2022-10-01_ConcreteRF/2022-10-01_ConcreteRF.html" class="no-external">
 <div class="listing-date">
 Oct 1, 2022
 </div>
@@ -896,32 +947,30 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="24" data-categories="tidymodels" data-listing-date-sort="1663995600000" data-listing-file-modified-sort="1662144461326" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5">
+<div class="quarto-post image-right" data-index="25" data-categories="tidymodels" data-listing-date-sort="1663995600000" data-listing-file-modified-sort="1662144461326" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="852">
 <div class="thumbnail">
-<p><a href="./posts/2022-09-24_ConcreteXGB/2022-09-24_ConcreteXGB.html"> <p class="card-img-top"><img src="posts\2022-09-24_ConcreteXGB\2022-09-24_ConcreteXGB_files\figure-html\unnamed-chunk-12-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2022-09-24_ConcreteXGB/2022-09-24_ConcreteXGB.html" class="no-external"></a></p><a href="./posts/2022-09-24_ConcreteXGB/2022-09-24_ConcreteXGB.html" class="no-external">
+<p class="card-img-top"><img data-src="posts\2022-09-24_ConcreteXGB\2022-09-24_ConcreteXGB_files\figure-html\unnamed-chunk-12-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2022-09-24_ConcreteXGB/2022-09-24_ConcreteXGB.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2022-09-24_ConcreteXGB/2022-09-24_ConcreteXGB.html">
 <h3 class="no-anchor listing-title">
-Prediction of Concrete Strength using XGBoost
+<a href="./posts/2022-09-24_ConcreteXGB/2022-09-24_ConcreteXGB.html" class="no-external">Prediction of Concrete Strength using XGBoost</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2022-09-24_ConcreteXGB/2022-09-24_ConcreteXGB.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('tidymodels'); return false;">
 tidymodels
 </div>
 </div>
-<a href="./posts/2022-09-24_ConcreteXGB/2022-09-24_ConcreteXGB.html">
 <div class="listing-description">
-A gradient boosting model to predict the compressive strength of concrete was built using a tidymodels approach.
+<a href="./posts/2022-09-24_ConcreteXGB/2022-09-24_ConcreteXGB.html" class="no-external">A gradient boosting model to predict the compressive strength of concrete was built using a tidymodels approach.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-09-24_ConcreteXGB/2022-09-24_ConcreteXGB.html">
+<a href="./posts/2022-09-24_ConcreteXGB/2022-09-24_ConcreteXGB.html" class="no-external">
 <div class="listing-date">
 Sep 24, 2022
 </div>
@@ -931,32 +980,30 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="25" data-categories="tidymodels" data-listing-date-sort="1663390800000" data-listing-file-modified-sort="1662140624954" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5">
+<div class="quarto-post image-right" data-index="26" data-categories="tidymodels" data-listing-date-sort="1663390800000" data-listing-file-modified-sort="1662140624954" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="930">
 <div class="thumbnail">
-<p><a href="./posts/2022-09-17_ConcreteMLP/2022-09-17_ConcreteMLP.html"> <p class="card-img-top"><img data-src="posts\2022-09-17_ConcreteMLP\2022-09-17_ConcreteMLP_files\figure-html\unnamed-chunk-8-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2022-09-17_ConcreteMLP/2022-09-17_ConcreteMLP.html" class="no-external"></a></p><a href="./posts/2022-09-17_ConcreteMLP/2022-09-17_ConcreteMLP.html" class="no-external">
+<p class="card-img-top"><img data-src="posts\2022-09-17_ConcreteMLP\2022-09-17_ConcreteMLP_files\figure-html\unnamed-chunk-8-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2022-09-17_ConcreteMLP/2022-09-17_ConcreteMLP.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2022-09-17_ConcreteMLP/2022-09-17_ConcreteMLP.html">
 <h3 class="no-anchor listing-title">
-Neural Network for Concrete Dataset
+<a href="./posts/2022-09-17_ConcreteMLP/2022-09-17_ConcreteMLP.html" class="no-external">Neural Network for Concrete Dataset</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2022-09-17_ConcreteMLP/2022-09-17_ConcreteMLP.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('tidymodels'); return false;">
 tidymodels
 </div>
 </div>
-<a href="./posts/2022-09-17_ConcreteMLP/2022-09-17_ConcreteMLP.html">
 <div class="listing-description">
-A single-layer neural network is fit to predict concrete compressive strength.
+<a href="./posts/2022-09-17_ConcreteMLP/2022-09-17_ConcreteMLP.html" class="no-external">A single-layer neural network is fit to predict concrete compressive strength.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-09-17_ConcreteMLP/2022-09-17_ConcreteMLP.html">
+<a href="./posts/2022-09-17_ConcreteMLP/2022-09-17_ConcreteMLP.html" class="no-external">
 <div class="listing-date">
 Sep 17, 2022
 </div>
@@ -966,25 +1013,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="26" data-listing-date-sort="1662786000000" data-listing-file-modified-sort="1662139333925" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5">
+<div class="quarto-post image-right" data-index="27" data-listing-date-sort="1662786000000" data-listing-file-modified-sort="1662139333925" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="851">
 <div class="thumbnail">
-<p><a href="./posts/2022-09-10_ConcreteNLS/2022-09-10_ConcreteNLS.html"> <p class="card-img-top"><img data-src="posts\2022-09-10_ConcreteNLS\2022-09-10_ConcreteNLS_files\figure-html\unnamed-chunk-4-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2022-09-10_ConcreteNLS/2022-09-10_ConcreteNLS.html" class="no-external"></a></p><a href="./posts/2022-09-10_ConcreteNLS/2022-09-10_ConcreteNLS.html" class="no-external">
+<p class="card-img-top"><img data-src="posts\2022-09-10_ConcreteNLS\2022-09-10_ConcreteNLS_files\figure-html\unnamed-chunk-4-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2022-09-10_ConcreteNLS/2022-09-10_ConcreteNLS.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2022-09-10_ConcreteNLS/2022-09-10_ConcreteNLS.html">
 <h3 class="no-anchor listing-title">
-Conventional Material Models for Concrete Dataset
+<a href="./posts/2022-09-10_ConcreteNLS/2022-09-10_ConcreteNLS.html" class="no-external">Conventional Material Models for Concrete Dataset</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2022-09-10_ConcreteNLS/2022-09-10_ConcreteNLS.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Fitting the concrete dataset to a pre-determined equation using a non-linear, least squares approximation.
+<a href="./posts/2022-09-10_ConcreteNLS/2022-09-10_ConcreteNLS.html" class="no-external">Fitting the concrete dataset to a pre-determined equation using a non-linear, least squares approximation.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-09-10_ConcreteNLS/2022-09-10_ConcreteNLS.html">
+<a href="./posts/2022-09-10_ConcreteNLS/2022-09-10_ConcreteNLS.html" class="no-external">
 <div class="listing-date">
 Sep 10, 2022
 </div>
@@ -994,32 +1041,30 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="27" data-categories="tidymodels" data-listing-date-sort="1662181200000" data-listing-file-modified-sort="1662136063563" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6">
+<div class="quarto-post image-right" data-index="28" data-categories="tidymodels" data-listing-date-sort="1662181200000" data-listing-file-modified-sort="1662136063563" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1151">
 <div class="thumbnail">
-<p><a href="./posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html"> <p class="card-img-top"><img data-src="posts\2022-09-03_ConcreteGLM\2022-09-03_ConcreteGLM_files\figure-html\unnamed-chunk-7-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html" class="no-external"></a></p><a href="./posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html" class="no-external">
+<p class="card-img-top"><img data-src="posts\2022-09-03_ConcreteGLM\2022-09-03_ConcreteGLM_files\figure-html\unnamed-chunk-7-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html">
 <h3 class="no-anchor listing-title">
-GLM model for Concrete Strength
+<a href="./posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html" class="no-external">GLM model for Concrete Strength</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('tidymodels'); return false;">
 tidymodels
 </div>
 </div>
-<a href="./posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html">
 <div class="listing-description">
-A generalized linear model (GLM) was built to predict the compressive strength of high-performance concrete formulations.
+<a href="./posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html" class="no-external">A generalized linear model (GLM) was built to predict the compressive strength of high-performance concrete formulations.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html">
+<a href="./posts/2022-09-03_ConcreteGLM/2022-09-03_ConcreteGLM.html" class="no-external">
 <div class="listing-date">
 Sep 3, 2022
 </div>
@@ -1029,32 +1074,30 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="28" data-categories="reticulate" data-listing-date-sort="1662094800000" data-listing-file-modified-sort="1662147380993" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4">
+<div class="quarto-post image-right" data-index="29" data-categories="reticulate" data-listing-date-sort="1662094800000" data-listing-file-modified-sort="1662147380993" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="775">
 <div class="thumbnail">
-<p><a href="./posts/2022-09-02_ReticulateSetup/2022-09-02_ReticulateSetup.html"> <p class="card-img-top"><img data-src="posts\2022-09-02_ReticulateSetup\2022-09-02_ReticulateSetup_files\figure-html\unnamed-chunk-9-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2022-09-02_ReticulateSetup/2022-09-02_ReticulateSetup.html" class="no-external"></a></p><a href="./posts/2022-09-02_ReticulateSetup/2022-09-02_ReticulateSetup.html" class="no-external">
+<p class="card-img-top"><img data-src="posts\2022-09-02_ReticulateSetup\2022-09-02_ReticulateSetup_files\figure-html\unnamed-chunk-9-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2022-09-02_ReticulateSetup/2022-09-02_ReticulateSetup.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2022-09-02_ReticulateSetup/2022-09-02_ReticulateSetup.html">
 <h3 class="no-anchor listing-title">
-Python Setup in RStudio using reticulate
+<a href="./posts/2022-09-02_ReticulateSetup/2022-09-02_ReticulateSetup.html" class="no-external">Python Setup in RStudio using reticulate</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2022-09-02_ReticulateSetup/2022-09-02_ReticulateSetup.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('reticulate'); return false;">
 reticulate
 </div>
 </div>
-<a href="./posts/2022-09-02_ReticulateSetup/2022-09-02_ReticulateSetup.html">
 <div class="listing-description">
-My experience setting up Python using the <code>reticulate</code> package and the RStudio IDE.
+<a href="./posts/2022-09-02_ReticulateSetup/2022-09-02_ReticulateSetup.html" class="no-external">My experience setting up Python using the <code>reticulate</code> package and the RStudio IDE.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-09-02_ReticulateSetup/2022-09-02_ReticulateSetup.html">
+<a href="./posts/2022-09-02_ReticulateSetup/2022-09-02_ReticulateSetup.html" class="no-external">
 <div class="listing-date">
 Sep 2, 2022
 </div>
@@ -1064,25 +1107,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="29" data-listing-date-sort="1661490000000" data-listing-file-modified-sort="1662134624587" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3">
+<div class="quarto-post image-right" data-index="30" data-listing-date-sort="1661490000000" data-listing-file-modified-sort="1662134624587" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="520">
 <div class="thumbnail">
-<p><a href="./posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html"> <p class="card-img-top"><img data-src="posts\2022-08-26_ConcreteEDA\2022-08-26_ConcreteEDA_files\figure-html\unnamed-chunk-4-1.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html" class="no-external"></a></p><a href="./posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html" class="no-external">
+<p class="card-img-top"><img data-src="posts\2022-08-26_ConcreteEDA\2022-08-26_ConcreteEDA_files\figure-html\unnamed-chunk-4-1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html">
 <h3 class="no-anchor listing-title">
-Exploratory Analysis of the Concrete Dataset
+<a href="./posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html" class="no-external">Exploratory Analysis of the Concrete Dataset</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-Several exploratory data analysis (EDA) packages are used to evaluate the concrete dataset.
+<a href="./posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html" class="no-external">Several exploratory data analysis (EDA) packages are used to evaluate the concrete dataset.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html">
+<a href="./posts/2022-08-26_ConcreteEDA/2022-08-26_ConcreteEDA.html" class="no-external">
 <div class="listing-date">
 Aug 26, 2022
 </div>
@@ -1092,25 +1135,25 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="30" data-listing-date-sort="1660885200000" data-listing-file-modified-sort="1662068352031" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2">
+<div class="quarto-post image-right" data-index="31" data-listing-date-sort="1660885200000" data-listing-file-modified-sort="1662068352031" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="324">
 <div class="thumbnail">
-<p><a href="./posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html"> <div class="listing-item-img-placeholder card-img-top" >&nbsp;</div> </a></p>
+<p><a href="./posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html" class="no-external"></a></p><a href="./posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html">
 <h3 class="no-anchor listing-title">
-Introduction to the Concrete Dataset
+<a href="./posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html" class="no-external">Introduction to the Concrete Dataset</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-I have a particular interest in the ability of machine learning algorithms to predict formulations and I am always searching for these types of datasets.
+<a href="./posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html" class="no-external">I have a particular interest in the ability of machine learning algorithms to predict formulations and I am always searching for these types of datasets.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html">
+<a href="./posts/2022-08-19_ConcreteIntro/2022-08-19_ConcreteIntro.html" class="no-external">
 <div class="listing-date">
 Aug 19, 2022
 </div>
@@ -1120,32 +1163,30 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="31" data-categories="DataViz" data-listing-date-sort="1619499600000" data-listing-file-modified-sort="1670439679167" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7">
+<div class="quarto-post image-right" data-index="32" data-categories="DataViz" data-listing-date-sort="1619499600000" data-listing-file-modified-sort="1670439679167" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1284">
 <div class="thumbnail">
-<p><a href="./posts/2021-04-27_tt_CEODepartures/2021-04-27_tt_CEODepartures.html"> <p class="card-img-top"><img data-src="posts\2021-04-27_tt_CEODepartures\CEODepartures.png"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2021-04-27_tt_CEODepartures/2021-04-27_tt_CEODepartures.html" class="no-external"></a></p><a href="./posts/2021-04-27_tt_CEODepartures/2021-04-27_tt_CEODepartures.html" class="no-external">
+<p class="card-img-top"><img data-src="posts\2021-04-27_tt_CEODepartures\CEODepartures.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2021-04-27_tt_CEODepartures/2021-04-27_tt_CEODepartures.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2021-04-27_tt_CEODepartures/2021-04-27_tt_CEODepartures.html">
 <h3 class="no-anchor listing-title">
-Tidy Tuesday: CEO Departures
+<a href="./posts/2021-04-27_tt_CEODepartures/2021-04-27_tt_CEODepartures.html" class="no-external">Tidy Tuesday: CEO Departures</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2021-04-27_tt_CEODepartures/2021-04-27_tt_CEODepartures.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('DataViz'); return false;">
 DataViz
 </div>
 </div>
-<a href="./posts/2021-04-27_tt_CEODepartures/2021-04-27_tt_CEODepartures.html">
 <div class="listing-description">
-My data visualization based on a dataset of CEO departures from 1500 S&amp;P firms from 2000-2018.
+<a href="./posts/2021-04-27_tt_CEODepartures/2021-04-27_tt_CEODepartures.html" class="no-external">My data visualization based on a dataset of CEO departures from 1500 S&amp;P firms from 2000-2018.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2021-04-27_tt_CEODepartures/2021-04-27_tt_CEODepartures.html">
+<a href="./posts/2021-04-27_tt_CEODepartures/2021-04-27_tt_CEODepartures.html" class="no-external">
 <div class="listing-date">
 Apr 27, 2021
 </div>
@@ -1155,32 +1196,30 @@ datadavidz
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="32" data-categories="DataViz" data-listing-date-sort="1618290000000" data-listing-file-modified-sort="1670447154495" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7">
+<div class="quarto-post image-right" data-index="33" data-categories="DataViz" data-listing-date-sort="1618290000000" data-listing-file-modified-sort="1670447154495" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1290">
 <div class="thumbnail">
-<p><a href="./posts/2021-04-13_tt_PostOffices/2021-04-13_tt_PostOffices.html"> <p class="card-img-top"><img data-src="posts\2021-04-13_tt_PostOffices\PostOffices.png" alt="Data Visualization for U.S. Post Offices"  class="thumbnail-image card-img"/></p> </a></p>
+<p><a href="./posts/2021-04-13_tt_PostOffices/2021-04-13_tt_PostOffices.html" class="no-external"></a></p><a href="./posts/2021-04-13_tt_PostOffices/2021-04-13_tt_PostOffices.html" class="no-external">
+<p class="card-img-top"><img data-src="posts\2021-04-13_tt_PostOffices\PostOffices.png" alt="Data Visualization for U.S. Post Offices"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2021-04-13_tt_PostOffices/2021-04-13_tt_PostOffices.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/2021-04-13_tt_PostOffices/2021-04-13_tt_PostOffices.html">
 <h3 class="no-anchor listing-title">
-Tidy Tuesday: U.S. Post Offices
+<a href="./posts/2021-04-13_tt_PostOffices/2021-04-13_tt_PostOffices.html" class="no-external">Tidy Tuesday: U.S. Post Offices</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/2021-04-13_tt_PostOffices/2021-04-13_tt_PostOffices.html" class="no-external"></a>
 </div>
-</a>
 <div class="listing-categories">
 <div class="listing-category" onclick="window.quartoListingCategory('DataViz'); return false;">
 DataViz
 </div>
 </div>
-<a href="./posts/2021-04-13_tt_PostOffices/2021-04-13_tt_PostOffices.html">
 <div class="listing-description">
-My data visualization based on a dataset of US Post Offices for 166,140 post offices that operated in the United States between 1639 and 2000.
+<a href="./posts/2021-04-13_tt_PostOffices/2021-04-13_tt_PostOffices.html" class="no-external">My data visualization based on a dataset of US Post Offices for 166,140 post offices that operated in the United States between 1639 and 2000.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/2021-04-13_tt_PostOffices/2021-04-13_tt_PostOffices.html">
+<a href="./posts/2021-04-13_tt_PostOffices/2021-04-13_tt_PostOffices.html" class="no-external">
 <div class="listing-date">
 Apr 13, 2021
 </div>
@@ -1233,18 +1272,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -1276,11 +1304,50 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
-  function tippyHover(el, contentFn) {
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/datadavidz\.github\.io");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1290,8 +1357,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1303,7 +1379,130 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1347,6 +1546,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1372,6 +1572,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1432,6 +1658,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+
 
 
 

@@ -1,0 +1,225 @@
+---
+title: "Advent of Code Day 19: Depth-First Search"
+date: 2024-08-13
+execute: 
+  cache: true
+---
+```{r}
+#| echo: false
+#| results: "hide"
+#renv::use(lockfile = "renv.lock")
+```
+
+Determine the optimal blueprint for building robots using a depth-first search algorithm
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 19.  The goal is to collect geodes using geode cracking robots.  To build a geode cracking robot, you need to have obsidian which requires obsidian collecting robots.  In order to build the obsidian collecting robot, you will need clay which requires clay collecting robots.  Building any of the robots also requires ore which is collected using ore robots with big drills.  You have multiple blueprints with different amounts of raw materials required for building the robots.  You need to find which blueprint maximizes the number of geodes collected.
+
+Blueprint examples:
+```
+Blueprint 1:
+  Each ore robot costs 4 ore.
+  Each clay robot costs 2 ore.
+  Each obsidian robot costs 3 ore and 14 clay.
+  Each geode robot costs 2 ore and 7 obsidian.
+
+Blueprint 2:
+  Each ore robot costs 2 ore.
+  Each clay robot costs 3 ore.
+  Each obsidian robot costs 3 ore and 8 clay.
+  Each geode robot costs 3 ore and 12 obsidian.
+```
+
+## Loading the input file
+
+Each blueprint is captured in a single line in the input file with each instruction separated by a space.  The ```read_lines``` function from the ```readr``` package is used to read the input file.
+
+```{r}
+#| warning: false
+library(readr)
+library(stringr)
+library(purrr)
+library(tidyverse)
+
+filepath <- here::here("./posts/data/aoc/day19_input.txt")
+#filepath <- here::here("./posts/data/aoc/day19_test.txt")
+
+robots <- read_lines(filepath, skip_empty_rows = TRUE)
+```
+
+## Data Cleaning
+
+Each blueprint (line) needs to be parsed.  The first step splits the string at the colon to separate the blueprint number from the rest of the blueprint instructions.  The next step is to split each of the instructions using the period. The third step is to extract the all number followed by a word in each instruction.  For example, "Each obsidian robot costs 3 ore and 8 clay" is extracted into "3 ore" and "8 clay".  The last step is to replace the resource type by a number specific to each type.
+
+```{r}
+#split blueprint number from instructions
+temp <- str_split(robots, ": ")
+#split each instruction step
+robot_types <- map(temp, \(x) unlist(str_split(x[2], "\\. ")))
+#extract the resource type and amount
+bp <- map(robot_types, \(y) map(y, \(x) unlist(str_extract_all(x, "\\d+ \\w+"))))
+bp <- map(bp, \(y) map(y,  \(x) str_replace_all(x, c(ore = "1", clay = "2", obsidian = "3"))))
+```
+
+## Depth-First Search
+
+A depth-first search is performed to find the strategy to crack the most geodes from a blueprint.  A recursive function is created to perform the depth-first search.  Several optimizations are implemented to improve the speed of the search.  A cache is used to store the results when a prior state which has already been calculated is available.  A second optimization is to limit the number of robots of a given type by the maximum spend in a turn.  This maxspend is calculated in a separate function.  The last optimization is to limit the recorded amount to the maximum that can be used in the remaining time.  This last optimization helps with the caching since the result will be the same regardless of the amount of unusable resources available.
+
+```{r}
+dfs <- function(bp, maxspend, cache, time, bots, amt) {
+  #return number of geodes if time has expired
+  if (time == 0) return(amt[4])
+  
+  #if previously seen then return value
+  key <- paste(c(time, bots, amt), collapse = " ")
+  cache_index <- cache[[key]]
+  if (!is.null(cache_index)) return(cache_index)
+  
+  maxval <- amt[4] + bots[4] * time
+  
+  for (blue in bp) {
+    for (btype in 1:length(blue)) {
+      #optimization to not exceed maxspend for a given bot type
+      if ((btype !=  4) & (bots[btype] >= maxspend[btype])) next
+
+      wait <- 0
+      breakFlag <- FALSE
+    
+      for (i in 1:length(blue[[btype]])) {
+        temp <- as.numeric(unlist(str_split(blue[[btype]][i], " ")))
+        ramt <- temp[1]
+        rtype <- temp[2]
+      
+        #avoid divide by zero error
+        if (bots[rtype] == 0){
+          breakFlag <- TRUE
+          break
+        }
+        wait <- max(wait, ceiling((ramt - amt[rtype]) / bots[rtype]))
+        #print(c("wait=", wait, breakFlag))
+      }
+      if (!breakFlag) {
+        remtime <- time - wait - 1
+        if (remtime <= 0) next
+        
+        bots_tmp <- bots
+        amt_tmp <- amt + bots * (wait + 1)
+        
+        for (i in 1:length(blue[[btype]])) {
+          temp <- as.numeric(unlist(str_split(blue[[btype]][i], " ")))
+          ramt <- temp[1]
+          rtype <- temp[2]
+          amt_tmp[rtype] <- amt_tmp[rtype] - ramt 
+        }
+        bots_tmp[btype] <- bots_tmp[btype] + 1
+        #third optimization to limit amount to maximum which can be used in the remaining time
+        for (j in (1:3)) {
+          amt_tmp[j] <- min(amt_tmp[j], maxspend[j] * remtime)
+        }
+        #print(paste("remtime= ", remtime, "bots_tmp= ", paste(bots_tmp, collapse = " "), "amt_tmp=", paste(amt_tmp, collapse = " ")))
+        maxval <- max(maxval, dfs(bp, maxspend, cache, remtime, bots_tmp, amt_tmp))
+      }
+    }
+  }
+  cache[[key]] <<- maxval
+  return(maxval)
+}
+```
+
+The function to find the maximum spend takes the blueprint instructions for a given blueprint and calculates the maximum resource amount which can be utilized in a single turn.  This result is then used for two search optimizations as described above.
+
+```{r}
+find_maxspend <- function(bp_lst, bp_num){
+  maxspend <- c(0, 0, 0)
+  for (blue in bp_lst[[bp_num]]) {
+    for (i in 1:length(blue)) {
+      temp <- as.numeric(unlist(str_split(blue[[i]], " ")))
+      if (temp[2] == 1) {
+        maxspend[1] <- max(maxspend[1], temp[1])
+      } else if (temp[2] == 2) {
+        maxspend[2] <- max(maxspend[2], temp[1])
+      } else if (temp[2] == 3) {
+        maxspend[3] <- max(maxspend[3], temp[1])
+      } else {
+        maxspend <- maxspend
+      }
+    }
+  }
+  return(maxspend)
+}
+```
+
+## Part 1 Solution
+
+In Part 1, you have 24 minutes to crack the most number of geodes from each blueprint.  There are a total of 30 blueprints in the input file.  An R environment is set up as a hash table to serve as the cache for already calculated states.  The robot is initialized with one ore robot and no available resources.  The total value for the puzzle solution is calculated as summation of the blueprint number multiplied by the number of geodes cracked.
+
+```{r}
+total <- 0
+
+for (i in 1:length(bp)) {
+  #print(paste(i, Sys.time()))
+  cache <- new.env(hash = TRUE)
+  total_time <- 24
+  bots <- c(1, 0, 0, 0)
+  amt <- c(0, 0, 0, 0)
+  maxspend <- find_maxspend(bp, i)
+  v <- dfs(bp[i], maxspend, cache, total_time, bots, amt)
+  total <- total + (i * v)
+}
+
+total
+```
+
+The puzzle solution was calculated to be 1199.
+
+## Part 2 Solution
+
+In Part 2, the time available to crack the geodes has been increase to 32 minutes however only the first 3 blueprints are now available.  The puzzle solution is calculated differently as well for Part 2.  In this case, we just multiply the number of cracked geodes for each of the three blueprints together to get the total value.  Increasing the total time available significantly increases the amount of time required to solve each blueprint.
+
+```{r}
+total <- 1
+
+for (i in 1:3) {
+  #print(paste(i, Sys.time()))
+  cache <- new.env(hash = TRUE)
+  total_time <- 32
+  bots <- c(1, 0, 0, 0)
+  amt <- c(0, 0, 0, 0)
+  maxspend <- find_maxspend(bp, i)
+  v <- dfs(bp[i], maxspend, cache, total_time, bots, amt)
+  total <- total * v
+  print(Sys.time())
+}
+
+total
+```
+
+The puzzle solution for Part 2 was calculated as 3510.
+
+## Summary
+A depth-first search algorithm was implemented to reach the optimum solution for each set of blueprint instructions.  A hash environment was effectively used as a cache to reduce the search time.  A couple of additional time optimizations were implemented based on this specific problem in order to not calculate scenarios which were clearly not going to result in the best solution.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::

@@ -1,0 +1,11 @@
+readr
+stringr
+purrr
+tidyverse
+ggplot2
+tibble
+tidyr
+dplyr
+forcats
+lubridate
+sessioninfo
