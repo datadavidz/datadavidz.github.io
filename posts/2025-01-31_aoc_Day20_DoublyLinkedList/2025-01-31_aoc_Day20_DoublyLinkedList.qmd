@@ -1,0 +1,237 @@
+---
+title: "Advent of Code Day 20: Doubly-Linked List"
+date: 2025-01-31
+---
+```{r}
+#| echo: false
+#| results: "hide"
+#renv::use(lockfile = "renv.lock")
+```
+
+Track an encryption algorithm by implementing a doubly-linked list
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 20.  The goal is to find coordinates to a grove by applying an encryption algorithm to a sequence of numbers.  The coordinates are then found on the 1000th, 2000th and 3000th number away from the 0 value in the number sequence.  The encryption algorithm is to move each number in the sequence forward or backward in the list according to its value.  A negative value moves the number backwards and a positive value moves the number forwards.  Each number in the sequence is moved in the order of the original sequence.  The list is circular meaning moving past the last number in the sequence results in starting back at the beginning of the sequence and vice versa.  An example is provided as such:
+
+```
+Initial arrangement:
+1, 2, -3, 3, -2, 0, 4
+
+1 moves between 2 and -3:
+2, 1, -3, 3, -2, 0, 4
+
+2 moves between -3 and 3:
+1, -3, 2, 3, -2, 0, 4
+
+-3 moves between -2 and 0:
+1, 2, 3, -2, -3, 0, 4
+
+3 moves between 0 and 4:
+1, 2, -2, -3, 0, 3, 4
+
+-2 moves between 4 and 1:
+1, 2, -3, 0, 3, 4, -2
+
+0 does not move:
+1, 2, -3, 0, 3, 4, -2
+
+4 moves between -3 and 0:
+1, 2, -3, 4, 0, 3, -2
+```
+
+After each number in the initial sequence has been mixed one time, the coordinates are found by cycling through the list starting at the 0 value.  The puzzle solution is then found from the summation of the 3 coordinates corresponding to the 1000th, 2000th and 3000th number away from 0 in the mixed sequence.
+
+## Loading the input file
+
+Each number in the sequence is captured in a single line of the input file.  The ```read_lines``` function from the ```readr``` package is used to read the input file.  The input file sequence contained 5000 numbers.
+
+```{r}
+#| warning: false
+library(readr)
+
+filepath <- here::here("./posts/data/aoc/day20_input.txt")
+#filepath <- here::here("./posts/data/aoc/day20_test.txt")
+
+fileseq <- read_lines(filepath, skip_empty_rows = TRUE) |> as.numeric()
+```
+
+## Data Cleaning / Structure
+
+A doubly-linked list structure is used to keep track of the mixed sequence.  In this case, the number before and after each sequence element is recorded and updated at each step.  This structure is programmatically easier to maintain rather than slicing and reforming the list each time.  The initial structure is set up from the input file using the ```create_linked_list``` function shown below.  Each list element contains the value (v), left or preceding element (l) and right or succeeding element (r).  The modulo calculation is used to connect the beginning and end of the list to make it circular.
+
+```{r}
+create_linked_list <- function(file_seq, crypt_key) {
+  lnk_lst <- list()
+  for (i in 1:length(file_seq)) {
+    node <- list(v = file_seq[i] * crypt_key, 
+                l = ifelse(((i - 1) %% length(file_seq)) == 0, as.numeric(length(file_seq)), ((i - 1) %% length(file_seq))),
+                r = ifelse(((i + 1) %% length(file_seq)) == 0, length(file_seq), ((i + 1) %% length(file_seq))))
+    lnk_lst <- c(lnk_lst, list(node))
+  }
+  return(lnk_lst)
+}
+```
+
+## Mixing the Sequence
+
+As mentioned previously, each element is moved forwards or backwards in the sequence according to its value.  This mixing is performed in two steps: removing the element (node) from its current position and inserting the element (node) in its new position.  In each case, the links for the adjacent elements also need to be updated.  The function for the first step takes the current sequence and the location of the element to be moved.  If the element doesn't move as its value is 0 or the movement would result in the same position, no update is performed and the sequence is returned without change.  Otherwise, the links for the adjacent elements are changed to point to each other.
+
+```{r}
+remove_node <- function(lnk_lst, lst_loc) {
+  value <- lnk_lst[[lst_loc]]$v
+  movement <- ifelse(value >= 0, value %% (length(lnk_lst)-1), -value %% (length(lnk_lst)-1))
+  if (value == 0 | movement == 0){  
+  #if (value == 0){
+    return(lnk_lst)
+  }
+  l_loc <- lnk_lst[[lst_loc]]$l
+  r_loc <- lnk_lst[[lst_loc]]$r
+  lnk_lst[[l_loc]]$r <- r_loc
+  lnk_lst[[r_loc]]$l <- l_loc
+  return(lnk_lst)
+}
+```
+
+The function for the second step of inserting the element (node) in its new location is shown below.  Again, if the element value is 0 or the movement results in the same position, the sequence is returned unchanged.  The cases for moving forwards or backwards in the sequence are handled separately as it is more clear programmatically. In both cases, the links for the inserted element and the adjacent elements are updated.
+
+```{r}
+insert_node <- function(lnk_lst, lst_loc) {
+  value <- lnk_lst[[lst_loc]]$v
+  movement <- ifelse(value >= 0, value %% (length(lnk_lst)-1), -value %% (length(lnk_lst)-1))
+  if (value == 0 | movement == 0){
+    return(lnk_lst)
+  }
+  #move right
+  if (value > 0) {
+    new_loc <- lst_loc
+    for (i in 1:movement) {
+    #for (i in 1:(value %% length(lnk_lst))) {
+      new_loc <- lnk_lst[[new_loc]]$r
+      #print(new_loc)
+    }
+    #update inserted node left
+    lnk_lst[[lst_loc]]$l <- new_loc
+    #update inserted node right
+    lnk_lst[[lst_loc]]$r <- lnk_lst[[new_loc]]$r
+    #update right to insert to new left
+    lnk_lst[[lnk_lst[[new_loc]]$r]]$l <- lst_loc
+    #update left to insert to new right
+    lnk_lst[[new_loc]]$r <- lst_loc
+
+  # move left
+  } else {
+    new_loc <- lst_loc
+    for (i in 1:movement) {    
+    #for (i in 1:(-value %% length(lnk_lst))) {
+      new_loc <- lnk_lst[[new_loc]]$l
+    }
+    #update inserted node right
+    lnk_lst[[lst_loc]]$r <- new_loc
+    #update inserted node left
+    lnk_lst[[lst_loc]]$l <- lnk_lst[[new_loc]]$l
+    #update left to insert to new right
+    lnk_lst[[lnk_lst[[new_loc]]$l]]$r <- lst_loc    
+    #update right to insert to new left
+    lnk_lst[[new_loc]]$l <- lst_loc
+
+  }
+  return(lnk_lst)
+}
+```
+
+A simple function is created to return the position of the element with the zero value in the sequence.  This function is needed for the calculation of the grove coordinates.
+
+```{r}
+find_zero <- function(lnk_lst) {
+  for (i in 1:length(lnk_lst)) {
+    if (lnk_lst[[i]]$v == 0) return(i)
+  }
+  return(0)
+}
+```
+
+## Part 1 Solution
+
+The linked list is first created from the input sequence and then the sequence is mixed according to the encryption algorithm.
+```{r}
+linked_list <- create_linked_list(fileseq, 1)
+
+for (i in 1:length(linked_list)) {
+  linked_list <- remove_node(linked_list, i)
+  linked_list <- insert_node(linked_list, i)
+}
+```
+
+The solution is then found by summing the values for the 1000th, 2000th and 3000th elements from the element containing the zero value.  For this puzzle input, the total of the grove coordinates was 13883. 
+```{r}
+#puzzle solution initialized at 0
+total <- 0
+#start from zero
+new_loc <- find_zero(linked_list)
+
+for (i in 1:3){
+  for (i in 1:1000) {
+    new_loc <- linked_list[[new_loc]]$r
+  }
+total <- total + linked_list[[new_loc]]$v
+}
+
+total
+```
+## Part 2 Solution
+
+In part 2, a decryption key, 811589153, is included which is multiplied by each number in the initial sequence.  Also, the sequence is now mixed ten times rather than just once.  With these two minor adjustments, the same functions can be used as in Part 1.  Increasing the values does not increase the computation time much with the use of the modulo transformation.  Of course, the mixing takes longer since the sequence is mixed 10 times now.
+
+```{r}
+linked_list2 <- create_linked_list(fileseq, 811589153)
+
+for (j in 1:10) {
+  for (i in 1:length(linked_list2)) {
+    linked_list2 <- remove_node(linked_list2, i)
+    linked_list2 <- insert_node(linked_list2, i)
+  }
+}
+```
+
+The grove coordinates are found as in Part 1 and the summation is 19185967576920.
+```{r}
+total <- 0
+new_loc <- find_zero(linked_list2)
+
+for (i in 1:3){
+  for (i in 1:1000) {
+    new_loc <- linked_list2[[new_loc]]$r
+  }
+total <- total + linked_list2[[new_loc]]$v
+}
+
+options(scipen = 999)
+total
+```
+## Summary
+An encryption algorithm was tracked using a doubly-linked list.  This list structure enabled a programmatically clear approach to solving the puzzle.  The use of the modulo operator helped with the overall computation time and hardly any change was required to move from Part 1 with modest values to Part 2 with significantly higher values.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
