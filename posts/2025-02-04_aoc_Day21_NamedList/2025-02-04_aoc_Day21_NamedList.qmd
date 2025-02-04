@@ -1,0 +1,228 @@
+---
+title: "Advent of Code Day 21: Named List"
+date: 2025-02-04
+execute: 
+  cache: true
+---
+```{r}
+#| echo: false
+#| results: "hide"
+#renv::use(lockfile = "renv.lock")
+```
+
+Find solution by looping through a series of equations stored in a named list
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/) problem from Day 21.  Monkeys are yelling either a specific number or the result of a math operation.  The input file consists of the monkey's name and a colon followed by their yell as shown below.
+
+```
+root: pppw + sjmn
+dbpl: 5
+cczh: sllz + lgvd
+zczc: 2
+ptdq: humn - dvpt
+dvpt: 3
+lfqf: 4
+humn: 5
+ljgn: 2
+sjmn: drzm * dbpl
+sllz: 4
+pppw: cczh / lfqf
+lgvd: ljgn * ptdq
+drzm: hmdt - zczc
+hmdt: 32
+```
+
+In this case, the monkey named "dbpl" will yell a specific number, 5.  The monkey named "cczh" will yell the summation of the number yelled by the monkeys named "sllZ" and "lgvd".  The monkeys don't yell until they have a number or all the numbers hav been called which are required for their math operation.  Your goal is to figure out what the monkey named "root" will yell before he yells it.
+
+## Loading the input file
+
+Each monkey is captured in a single line of the input file and the actual file contains over 2000 monkeys.  The ```read_lines``` function from the ```readr``` package is used to read the input file.
+
+```{r}
+#| warning: false
+library(readr)
+library(stringr)
+options(scipen = 999)
+
+filepath <- here::here("./posts/data/aoc/day21_input.txt")
+#filepath <- here::here("./posts/data/aoc/day21_test.txt")
+
+yells <- read_lines(filepath, skip_empty_rows = TRUE)
+```
+
+## Part 1 Solution
+
+A while loop is used to cycle through the yelling monkeys.  The monkeys with specific numbers are stored in a named list called ```monkeys``` and removed from the iterated list of monkeys yet to yell ("x").  If the result of the math operation is available, the monkey is added to the ```monkeys``` list otherwise it is added to the end of the list of monkeys yet to yell.  The loop continues until the monkey named "root" yells.  The math operation is performed by parsing the text of the math operation and performing the calculation using the ```eval``` function.  A couple of functions from the ```stringr``` package are used to manipulate and evaluate the strings.
+
+```{r}
+monkeys <- list()
+x <- yells
+
+while(length(x) > 0) {
+ a <- x[1]
+ x <- tail(x, -1)
+ response <- str_split(a, ": ")
+ name <- response[[1]][1]
+ expr <- response[[1]][2]
+ if (str_detect(expr, "^[[:digit:]]+$")) {
+   monkeys[name] <- as.numeric(expr)
+ } else {
+   expression <- str_split(expr, " ")
+   left <- expression[[1]][1]
+   op <- expression[[1]][2]
+   right <- expression[[1]][3]
+   #test is both numbers for math operation are available
+   test_left <- left %in% names(monkeys)
+   test_right <- right %in% names(monkeys)
+   if (test_left & test_right) {
+     left_val <- monkeys[[left]]
+     right_val <- monkeys[[right]]
+     result <- eval(parse(text = paste0(left_val, op, right_val)))
+     monkeys[name] <- result
+     if (name == "root") break
+   } else {
+     #add unsolved math operation to end of the list
+     x <- c(x, a)
+   }
+ }
+}
+
+monkeys[["root"]]
+```
+The loop performed above using the named list runs quite quickly which will be important for Part 2.  Also, notice that the number yelled by "root" is quite large: 364367103397416.
+
+## Part 2 Solution
+
+Several changes to the puzzle are introduced in Part 2.  First, the monkey named "humn" is not a monkey after all and it actually stands for human and that human is you.  Also, the math operation for the monkey named root is not an addition but rather an equal sign meaning the numbers must match.  For the example above, the monkey "pppw" and the monkey "sjmn" must yell the same number.  So, you need to figure out the number to yell as "humn" in order for the numbers yelled by the two monkeys associated with root are the same.
+
+I saw online a couple of Python-based solution which used ```sympy``` to solve for the correct number for "humn".  I couldn't find a similar R-based solver in my initial search and so I tried an iterative search.  As the Part 1 solution was quite large, I also realized that the number for "humn" could be quite large as well.  I also assumed the solution would be an integer.
+
+The first function, ```find_root``` was created to find the names of the two monkeys required for "root" to yell.  I created this function because those monkeys were different between the test data and the input file.  This function enables me to switch between those two datasets without manually resetting the associated strings.
+
+```{r}
+find_root <- function(yells_vec) {
+  for (a in yells_vec) {
+   response <- str_split(a, ": ")
+   name <- response[[1]][1]
+   expr <- response[[1]][2]
+   if (name == "root") {
+     expression <- str_split(expr, " ")
+     left <- expression[[1]][1]
+     right <- expression[[1]][3]
+     #if found, return in a string vector
+     return(c(left, right))
+   }
+  }
+  #if can't find root, return zeros
+  return(c(0,0))
+}
+```
+
+Next, the loop created in Part 1 is converted into a function with some small changes.  The number for "humn" is replaced with a guess which is an argument to the function.  The two monkeys associated with "root" are passed as the ```root_lbls``` argument and determined from the ```find_root``` function.  If the monkey name is "root", the difference is calculated between the monkeys as ```diff``` when both of those monkeys have yelled their numbers.
+
+```{r}
+humn_search <- function(yells_vec, guess, root_lbls) {
+  monkeys <- list()
+  x <- yells_vec
+  
+  while(length(x) > 0) {
+   a <- x[1]
+   x <- tail(x, -1)
+   response <- str_split(a, ": ")
+   name <- response[[1]][1]
+   expr <- response[[1]][2]
+   if (str_detect(expr, "^[[:digit:]]+$")) {
+     #replace humn with the guess instead of what was in the file
+     monkeys[name] <- ifelse(name == "humn", guess, as.numeric(expr))
+   } else {
+     expression <- str_split(expr, " ")
+     left <- expression[[1]][1]
+     op <- expression[[1]][2]
+     right <- expression[[1]][3]
+     test_left <- left %in% names(monkeys)
+     test_right <- right %in% names(monkeys)
+     if (test_left & test_right) {
+       left_val <- monkeys[[left]]
+       right_val <- monkeys[[right]]
+       result <- eval(parse(text = paste0(left_val, op, right_val)))
+       monkeys[name] <- result
+       if (name == "root") {
+         #calculate difference between the monkeys related to root
+         diff <- monkeys[[root_lbls[1]]] - monkeys[[root_lbls[2]]]
+         break
+       }
+     } else {
+       x <- c(x, a)
+     }
+   }
+  }
+  return(diff)
+}
+```
+
+The first step to find the solution to Part 2 was to identify the number of digits.  I did this by iterating by powers of 10 from 1 up to 20 and stopping once a sign change in the difference from ```humn_search``` is detected.  For the input dataset, the solution was determined to be a 13-digit number.
+
+```{r}
+val_srch <- 1:20
+root_labels <- find_root(yells)
+curr_sign <- sign(humn_search(yells, 1, root_labels))
+
+for (i in val_srch) {
+  new_sign <- sign(humn_search(yells, 1*10^i, root_labels))
+  if (new_sign != curr_sign) break
+}
+```
+
+The next step was to determine each digit for the solution.  Two for loops were used to cycle through all 13 digits starting at the highest place and, again, checking for the sign change.  The ```sign``` function will return -1 for a negative number, 1 for a positive number and 0 for zero.  If the difference is 0, the solution has been found and the number is returned.
+
+```{r}
+val2_srch <- 1:10
+solution <- 0
+
+for (k in 1:i) {
+  for (j in val2_srch) {
+    new_sign <- sign(humn_search(yells, solution + j*10^(i-k), root_labels))
+    if (new_sign != curr_sign) break
+  }
+  #if sign == 0 then the solution has been found
+  if (new_sign == 0) {
+    solution <- solution + j*10^(i-k)
+  } else {
+    solution <- solution + (j-1)*10^(i-k)
+  }
+  if (new_sign == 0) break
+}
+
+solution
+```
+The number to be yelled by me, the "humn", was found to be 3782852515583.  This was a bit of a hacky way to arrive at the solution and made certain assumptions that the solution would be positive, an integer and would have one sign change transition across this range.
+
+## Summary
+A while loop with a named list structure was used to efficiently arrive at the solution to Part 1.  A very similar loop was implemented as a function to search for the number to solve Part 2.  Further optimizations are certainly possible however this less optimum solution was able to arrive at the solution in under a minute.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
+
