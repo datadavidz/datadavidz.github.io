@@ -1,0 +1,317 @@
+---
+title: "Advent of Code Day 23: Unstable Diffusion"
+date: 2025-02-12
+---
+```{r}
+#| echo: false
+#| results: "hide"
+#renv::use(lockfile = "renv.lock")
+```
+
+Optimize runtime of code using duplicated instead of %in%
+
+## Introduction
+
+This post explains my solution to the [Advent of Code](http://adventofcode.com/2022).  In this puzzle, the elves are ready to plant their star fruit and they need to spread out.  You have a map of their current locations.  There is a set of rules for their movement.  If no other elves are in any of the 8 cardinal directions, the elf stays put.  If there is another elf present, the elf attempts to move N, S, W and E in that order.  Before moving the elf checks for another elf in that direction and the two adjacent cardinal directions.  For example, before moving north the elf checks N, NW and NE for another elf.  If an elf is present, the elf tries the next direction (S, in this case) and so on.  However, if more than one elf choses to move to a space, neither of the elves will move.
+
+Your goal in Part 1 is to find the number of empty spaces on the map after 10 rounds.  After each round, the order of the movement shifts forward by one (e.g. N-S-W-E becomes S-W-E-N).  Since the available area is able to increase indefinitely as the elves move, the rectangular border for calculating the empty spaces is bounded by the furthest elf in each direction.  An example map is shown below with the elves shown with "#" and empty spaces as ".".
+
+```
+....#..
+..###.#
+#...#.#
+.#...##
+#.###..
+##.#.##
+.#..#..
+```
+
+## Loading the input file
+
+The `read_lines` function from the `readr` package is used to read the input file.
+
+```{r}
+#| warning: false
+library(readr)
+library(stringr)
+
+filepath <- here::here("./posts/data/aoc/day23_input.txt")
+#filepath <- here::here("./posts/data/aoc/day23_test.txt")
+
+input_map <- read_lines(filepath, skip_empty_rows = FALSE)
+```
+
+The map is transformed into a list containing the row and column position for each elf as a numeric vector.  The input file contains 2757 elves which are contained in a list of the same length.
+
+```{r}
+elves <- list()
+
+for (i in 1:length(input_map)) {
+  map_row <- str_split_1(input_map[i], "")
+  for (j in 1:length(map_row)) {
+    if (map_row[j] == "#") {
+      elves <- c(elves, list(as.numeric(c(i, j))))
+    }  
+  }
+}
+```
+
+Several variables are set up for the order of movement, movements, neighbors to check and the positions to scan before making a move.
+
+```{r}
+#order of movement
+ord <- c("n", "s", "w", "e")
+
+#moves (added to current position)
+moves <- list(n = c(-1, 0),
+            s = c(1, 0),
+            w = c(0, -1),
+            e = c(0, 1))
+
+#adjacent positions in 8 cardinal directions - neighbors
+nbr <- list(c(-1,-1), c(-1,0), c(-1,1),
+     c(0,-1), c(0, 1),
+     c(1, -1), c(1, 0), c(1,1))
+
+#scan for each direction
+scanmap <- list(n = list(c(-1,-1), c(-1, 0), c(-1, 1)),
+            s = list(c(1, -1), c(1, 0), c(1, 1)),
+            w = list(c(-1, -1), c(0, -1), c(1, -1)),
+            e = list(c(-1, 1), c(0, 1), c(1, 1)))
+```
+
+## Part 1 Solution
+
+A loop is set up to determine the moves for each round.  The code checks if any elves in adjacent positions are present (neighbors), if not then no move is necessary and next elf is tested.  If at least one elf is present, it checks the positions in different directions in order to determine which move to make.  If an open move is found, it checks if it has been already made once or twice already.
+
+The second part of the code repeats the loop but actually makes the move by updating the elves position, if the move is not to the same position as one or more other elves.
+
+```{r}
+#| eval: false
+
+#number of rounds
+nr <- 10
+
+for (rounds in 1:nr) {
+  print(paste("Round", rounds, ": ", Sys.time()))
+  once <- list()
+  twice <- list()
+  prop <- list()
+  
+  for (elf in elves) {
+    #check if any neighbors present
+    if (!any(lapply(nbr, function(x) x + elf) %in% elves)) next
+    
+    #check directions in order until a move is found
+    for (d in ord) {
+      #print(d)
+      test <- lapply(lapply(scanmap[[d]], '[', 1:2), function(x) x + elf)
+      
+      #moves to the same spot are saved      
+      if (!any(test %in% elves)) {
+        prop <- list(c(elf + moves[[d]]))
+        #print(prop)
+        if (prop %in% twice) {
+          #do nothing
+        } else if (prop %in% once) {
+          twice <- c(twice, prop)
+        } else {
+          once <- c(once, prop)
+        }
+        break
+      }
+    }
+  }
+  #cache the current elves' positions
+  ec <- elves
+  
+  for (i in 1:length(ec)) {
+    #check for neighbors
+    if (!any(lapply(nbr, function(x) x + ec[[i]]) %in% ec)) next
+    
+    #check each direction in order
+    for (d in ord) {
+      test <- lapply(lapply(scanmap[[d]], '[', 1:2), function(x) x + ec[[i]])
+      
+      if (!any(test %in% ec)) {
+        
+        prop <- list(c(ec[[i]] + moves[[d]]))
+        #update the elf position if only elf to move to this position in this round
+        if (!(prop %in% twice)) {
+          #update the position
+          elves[[i]] <- unlist(prop)
+        } 
+        break
+      }
+    }
+  }
+  #update the order of movement directions
+  ord <- c(ord[2:4], ord[1])
+}
+```
+
+The puzzle solution is found by determining the smallest rectangle which contains all of the elves.  The number of empty spaces is then determined by subtracting the total number of elves (length of elves list) from the total possible positions (area = length * width).
+
+```{r}
+#| eval: false
+min_y <- min(sapply(elves, '[[', 1))
+max_y <- max(sapply(elves, '[[', 1))
+min_x <- min(sapply(elves, '[[', 2))
+max_x <- max(sapply(elves, '[[', 2)) 
+
+(max_y - min_y + 1) * (max_x - min_x + 1) - length(elves)
+```
+
+The total empty spaces after 10 rounds was 4049 for the input file.  The code to update positions for each round as shown above was very slow.  Each round took ~5 min to execute which could be managed for 10 rounds but further optimization will be necessary for Part 2.
+
+## Part 2 Solution
+
+For part 2, the question is how many rounds are required before the elves stop spreading out.  In this case, the number of rounds will be greater than 10 and checking other solutions online the number of rounds will be on the order of 1000.  Obviously, a run time of 5 min per round will be much too slow to arrive at the solution in a reasonable time.
+
+The first optimization I investigated was the double-checking for adjacent elves in the code.  For testing purposes, two functions were created with one function, unstored_nbrs, containing the two calculations as used in Part 1 and another function, stored_nbrs, which stores the results from the first check and just pulls the stored result in the second check.  The calculation for adjacent elves itself is slow with a run time of ~35 seconds.  So, eliminating the second calculation cuts the total run time nearly in half.
+
+```{r}
+#| eval: false
+#From part 1 solution
+unstored_nbrs <- function(elves, nbr) {
+  for (elf in elves) {
+    if (!any(lapply(nbr, function(x) x + elf) %in% elves)) next
+  }
+  for (elf in elves) {
+    if (!any(lapply(nbr, function(x) x + elf) %in% elves)) next
+  }
+}
+
+#Optimization 1 to cut time in about half
+stored_nbrs <- function(elves, nbr) {
+  stored <- list()
+  for (i in 1:length(elves)) {
+    if (!any(lapply(nbr, function(x) x + elves[[i]]) %in% elves)) {
+      stored[[i]] <- TRUE
+      next
+    } else {
+      stored[[i]] <- FALSE
+    }
+  }
+  for (j in 1:length(elves)) {
+    if (stored[[j]]) next    
+  }
+}
+```
+
+```{r}
+#| eval: false
+library(microbenchmark)
+  
+bench_vec <- microbenchmark(
+  `stored` <- stored_nbrs(elves, nbr),
+  `unstored` <- unstored_nbrs(elves, nbr),
+  times = 2
+)
+
+bench_vec
+```
+
+Reducing the total run time per round from 5 min to 4.5 min is nice but still much too slow for calculating 1000 rounds.  I should note that similar code as written for Part 1 in Python runs quite quickly and results can be obtained for Part 2 in a few seconds!  One of the solutions posted online used complex numbers to store the elves' coordinates rather than a numeric vector.  I tried a complex numbers implementation in R and it was a bit slower (5 seconds longer).
+
+Further analysis showed the ```%in%``` function was the major source of the long run times and is being used multiple times to search for vectors within a long list of vectors.  A major breakthrough was found on a whim by trying ```duplicated``` for this check instead of ```%in%```.  The ```duplicated``` function checks a list for duplicate elements and returns TRUE if the element has already been detected and FALSE is not detected.  I observed that applying ```duplicated``` on the elves list ran almost instantaneously however to check for specific numeric vectors within the elves list requires appending those vectors to the end of the list.  I then take the tail of the returned logical vector containing the checks for these specific vectors.  Surprisingly, the results from a function containing duplicated reduced the run time from ~35 sec to ~0.5 sec.
+
+```{r}
+#| eval: false
+#function using %in%
+check_nbrs <- function(elves, nbr) {
+  for (elf in elves) {
+    if (!any(lapply(nbr, function(x) x + elf) %in% elves)) next
+  }
+}
+
+#analogous function to above using duplicated
+check_nbrs_d <- function(elves, nbr) {
+  for (i in 1:length(elves)) {
+    if (!any(tail(duplicated(c(elves, lapply(nbr, function(x) x + elves[[i]]))), 8))) next
+  }
+}
+```
+
+```{r}
+#| eval: false
+bench_vec <- microbenchmark(
+  `in` <- check_nbrs(elves, nbr),
+  `duplicated` <- check_nbrs_d(elves, nbr),
+  times = 2
+)
+
+bench_vec
+```
+
+At this point, I decided to replace all instances of ```%in%``` with a ```duplicated``` check.  The result was a run time of ~1.5 sec per round which is still quite slow compared to a Python implementation but a more realistic run time for solving this puzzle in a more reasonable time of ~20 min.
+
+```{r}
+#| eval: false
+iter <- 1
+
+while (iter < 5000) {
+
+  #if (iter %% 10 == 1) print(paste("Round", iter, ": ", Sys.time()))
+  ec <- elves
+  
+  for (i in 1:length(elves)) {
+    #optimization with duplicated
+    if (!any(tail(duplicated(c(elves, lapply(nbr, function(x) x + elves[[i]]))), 8))) next
+    
+    for (d in ord) {
+      test <- lapply(lapply(scanmap[[d]], '[', 1:2), function(x) x + elves[[i]])
+      #optimization with duplicated
+      if (!any(tail(duplicated(c(elves, test)), 8))) {
+        ec[i] <- list(c(elves[[i]] + moves[[d]]))
+        break
+      }
+    }
+  }
+
+  #stop if no change
+  if (setequal(elves, ec)) break
+  
+  #replaces the whole need for storing multiple moves to the same position
+  not_dup <- !(duplicated(ec) | rev(duplicated(rev(ec))))
+  #update elves with the new positions
+  elves[not_dup] <- ec[not_dup]
+  #update the order of movement directions
+  ord <- c(ord[2:4], ord[1])
+  
+  iter <- iter + 1
+}
+
+iter
+```
+
+The need for storing multiple moves to the same position is eliminated by using two ```duplicated``` checks on the proposed moves in ```ec```, once in the forward direction and once in the reverse direction.  The moves which are not duplicated then are directly replaced in ```ec```.  As can be seen above, the code is much simpler for the implementation in Part 2 as compared with Part 1 and runs dramatically faster.
+
+The number of rounds before the elves stop moving was determined to be 1029.
+
+## Summary
+The main learning from the Day 23 puzzle was that the ```%in%``` function runs slowly for lists of numeric vectors.  The run time can be significantly reduced by using ```duplicated```.  This optimization was required to solve Part 2 in a reasonable amount of time in R.  It is also interesting that Python runs so much faster even on non-optimized code for this type of problem.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
