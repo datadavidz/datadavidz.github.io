@@ -1,0 +1,262 @@
+---
+title: "Advent of Code Day 24: Blizzard Basin"
+date: 2025-02-19
+---
+```{r}
+#| echo: false
+#| results: "hide"
+#renv::use(lockfile = "renv.lock")
+```
+
+A path-finding puzzle solved by using a breadth-first search approach.  A hash table is used to store previously seen states and the queue is implemented as a simple list.
+
+## Introduction
+
+This post explains my solution to the [Advent of Code 2022](http://adventofcode.com/2022) puzzle for Day 24.  In this puzzle, you leave with the Elves to travel to the extraction point.  You reach a valley which must be traversed however there a small blizzards traveling across the valley which must be avoided.  The valley is easy to see from your current location so you draw a map of the blizzard locations and the direction they are traveling.  An example is shown below.
+
+```
+#.######
+#>>.<^<#
+#.<..<<#
+#>v.><>#
+#<^v^^>#
+######.#
+```
+
+The '#' characters represent the walls of the valley which cannot be travelled past.  Accessible areas of the map are shown with "." characters.  The blizzards are shown as ">" for east moving, "<" for west moving, "^" for north moving and "v" for south moving.  The entrance is denoted by the "." in the northernmost row and the exit is denoted by the "." in the southernmost row.  The blizzards move one space in the direction they are traveling after each minute.  If the blizzard hits a wall, it is immediately replaced by a new blizzard on the opposite wall.  Two or more blizzards can occupy the same area
+
+You can move north, south, east, west or wait in your current position each minute.  Your goal is to get across the valley from the entrance to the exit in the least amount of time possible.
+
+## Loading the input file
+
+The `read_lines` function from the `readr` package is used to read the input file.
+
+```{r}
+#| warning: false
+library(readr)
+library(stringr)
+library(numbers) #for lcm
+
+#filepath <- here::here("./posts/data/aoc/day24_input.txt")
+filepath <- here::here("./posts/data/aoc/day24_test.txt")
+
+input_map <- read_lines(filepath, skip_empty_rows = FALSE)
+```
+
+The locations of the blizzards on the map are transformed into a list.  Within this list, the locations for all of the blizzards traveling in the same direction are each stored in its own sublist.  Here we indicate as left, right, up and down instead of N-S-E-W.  The locations are stored as the row and column coordinates however each is subtracted by 2.  The subtraction is to help with the modulo arithmetic later in the solution so that the first available blizzard location within the valley is at row 0 and column 0.
+```{r}
+blizzards <- list(l = list(), r = list(), u = list(), d = list())
+
+
+for (i in 1:length(input_map)) {
+  map_row <- str_split_1(input_map[i], "")
+  for (j in 1:length(map_row)) {
+    if (map_row[j] == "<") {
+      blizzards[[1]] <- c(blizzards[[1]], list(c(i-2,j-2)))       
+    } else if (map_row[j] == ">") {
+      blizzards[[2]] <- c(blizzards[[2]], list(c(i-2,j-2))) 
+    } else if (map_row[j] == "^") {
+      blizzards[[3]] <- c(blizzards[[3]], list(c(i-2,j-2)))
+    } else if (map_row[j] == "v") {
+      blizzards[[4]] <- c(blizzards[[4]], list(c(i-2,j-2)))
+    }
+  }
+}
+```
+
+## Part 1 Solution
+
+A breadth-first seach approach is used to find the optimal path to the valley exit.  Moves in all directions from the current location are tested to see if they are valid.  If valid and not at the exit, the time and location is added to the ```queue``` for exploring the next step.  The queue is initialized with the valley entrance location which is at row -1 and column 0 using the methodology described above.  An optimization for this problem is not to update the blizzard at each time but rather to convert your location to the equivalent position on the starting map given the time elapsed.  The ```bmoves``` list is created to help with this conversion.
+
+```{r}
+#total rows and columns
+rz <- length(input_map) - 2
+cz <- length(map_row) - 2
+
+#queue is current time, row, column
+queue <- list(c(0, -1, 0))
+#location we are going to
+target <- c(rz, cz - 1)
+#least common multiple - for search optimization
+lcm <- LCM(rz, cz)
+#available directions to move each turn from current location
+directions <- list(c(0, 1), c(0, -1), c(-1, 0), c(1, 0), c(0, 0))
+#for conversion of your location to state on starting map
+bmoves <- list(c(0, -1), c(0, 1), c(-1, 0), c(1, 0))
+```
+
+A hash environment, ```seen```, is implemented to save states (time, row, column) which have already been added to the queue.  A while loop is used to continue to explore states from from the queue until the goal is reached.  A move in each direction is explored and checked whether it is valid meaning not encountering a blizzard or a wall.  If it is a valid move, the new time and location is added to the queue (if not seen before).
+
+```{r}
+#hash environment to store previously added states
+seen <- new.env(hash = TRUE)
+
+while (length(queue) > 0) {
+  time <- queue[[1]][1]
+  cr <- queue[[1]][2]
+  cc <- queue[[1]][3]
+
+  #remove first element from list
+  queue[[1]] <- NULL
+  
+  #increment time here for calculations
+  time <- time + 1
+  
+  for (d in directions) {
+    nr <- cr + d[1]
+    nc <- cc + d[2]
+    if (all(target == c(nr, nc))) {
+      #force an exit by emptying queue
+      queue <- list()
+      break
+    }
+    #if new location is off the map and not at the starting point then skip
+    if ((nr < 0 | nc < 0 | nr > rz | nc > cz) & !all(c(nr, nc) == c(-1, 0))) {
+      next
+    }
+    
+    fail <- FALSE
+    
+    if (!all(c(nr, nc) == c(-1,0))) {
+      for (i in 1:4) {
+        tr <- bmoves[[i]][1]
+        tc <- bmoves[[i]][2]
+        prop <- list(c((nr - tr * time) %% rz, (nc - tc * time) %% cz))
+        #a faster implmentation to check if prop %in% blizzards[[i]]
+        if (tail(duplicated(c(blizzards[[i]], prop)),1)) {
+          #if new location encounters a blizzard then it fails
+          fail <- TRUE
+          break
+        }
+      }
+    }
+    
+    #if an acceptable move then add it to the queue if not previously seen
+    if (!fail) {
+      #uses lcm to reduce the number of states to explore
+      key <- paste(nr, nc, time %% lcm)
+      seen_index <- seen[[key]]
+      
+      if (!is.null(seen_index)) next
+      
+      seen[[key]] <- 1
+      queue <- c(queue, list(c(time, nr, nc)))
+    }
+  }
+}
+
+time
+```
+For the test map, the optimal path to from the valley entrance to the exit takes 18 mins.  For the input file which has 35 rows and 100 columns, the optimal path takes 232 min.  Another optimization implemented above was to recognize that the blizzard map returns to its original state at a time equivalent to the least common multiple of the number of rows and number of columns.  For the input file, the least common multiple is 700 which could help if you start exploring states beyond 700 minutes.
+
+## Part 2 Solution
+
+For the Part 2 puzzle, the elves ask if you can go back to the entrance because they forgot their snacks.  The goal here is to find the fastest route from the entrance to the exit then back to the entrance to pick up the snacks followed by returning to the exit to give the elves their snacks.  The changes required for a fairly straightforward.  There are now multiple targets broken up into three stages.  The stage needs to be included in the queue as the result depending on which target you are seeking.  I used 3 targets but the first and last target are the same location.  The main optimization added in part 2 is to reset the ```queue``` once a target is reached. This optimization decreased the calculation time for the input file from nearly 50 min down to 12 min (~4 min per stage) with the same result.
+
+```{r}
+#queue is current time, row, column, stage
+queue <- list(c(0, -1, 0, 1))
+targets <- list(c(rz, cz - 1), c(-1, 0), c(rz, cz - 1))
+
+seen <- new.env(hash = TRUE)
+max_stage <- 0
+
+while (length(queue) > 0) {
+  time <- queue[[1]][1]
+  cr <- queue[[1]][2]
+  cc <- queue[[1]][3]
+  #added the stage to the queue list
+  stage <- queue[[1]][4]
+
+  queue[[1]] <- NULL
+  
+  time <- time + 1
+  #status update since it takes ~12 min for the input file
+  if (stage > max_stage) {
+    max_stage <- stage
+    print(paste("Stage reached:", stage, Sys.time()))
+  }
+  
+  for (d in directions) {
+    nr <- cr + d[1]
+    nc <- cc + d[2]
+    
+    #next stage variable added
+    nstage <- stage
+    
+    if (all(targets[[stage]] == c(nr, nc))) {
+      #only stop if target reached in final stage
+      if (stage == 3) {
+        #force an exit by emptying queue
+        queue <- list()
+        break
+      }
+      nstage <- nstage + 1
+      queue <- list(c(time, nr, nc, nstage))
+    }
+    #using %in% here is fine since a short list
+    if ((nr < 0 | nc < 0 | nr > rz | nc > cz) & !(list(c(nr, nc)) %in% targets)) {
+      next
+    }
+    
+    fail <- FALSE
+
+    if (!(list(c(nr, nc)) %in% targets)) {
+      for (i in 1:4) {
+        tr <- bmoves[[i]][1]
+        tc <- bmoves[[i]][2]
+        prop <- list(c((nr - tr * time) %% rz, (nc - tc * time) %% cz))
+        #duplicated in place of %in% needed here for speed
+        if (tail(duplicated(c(blizzards[[i]], prop)),1)) {
+          fail <- TRUE
+          break
+        }
+      }
+    }
+    
+    if (!fail) {
+      #include stage
+      key <- paste(nr, nc, nstage, time %% lcm)
+      seen_index <- seen[[key]]
+      
+      if (!is.null(seen_index)) next
+      
+      seen[[key]] <- 1
+      #include stage
+      queue <- c(queue, list(c(time, nr, nc, nstage)))
+    }
+  }
+}
+
+time
+```
+
+As shown here, the optimal path for Part 2 using the test map was 54 mins.  For the input file, the fastest path took 715 mins.
+
+## Summary
+
+Similar to Day 23, the biggest challenge was to optimize the runtime to a reasonable length for solving the puzzle.  The trick of using ```duplicated``` instead of ```%in%``` was again applied when searching the longer lists.  The hash environment and breadth-first search algorithm from Day 18 was also implemented with good results.  Recognizing the queue could be reset at each target also significantly reduced the runtime.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
