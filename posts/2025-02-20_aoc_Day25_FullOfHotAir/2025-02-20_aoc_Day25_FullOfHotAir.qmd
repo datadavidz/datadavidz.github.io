@@ -1,0 +1,223 @@
+---
+title: "Advent of Code Day 25: Full of Hot Air"
+date: 2025-02-20
+---
+```{r}
+#| echo: false
+#| results: "hide"
+#renv::use(lockfile = "renv.lock")
+```
+
+Decode and encode numbers in a base-5 type of algorithm
+
+## Introduction
+
+This post explains my solution to the [Advent of Code 2022](http://adventofcode.com/2022) puzzle for Day 25.  You reach the extraction point and need to heat fuel before using in the hot air balloons which will take you to the North Pole.  A fuel heating machine is available but calibration requires knowing first how much total fuel will be processed.  The fuel requirements are written on each balloon with a "SNAFU" code.  The code is in base-5 however instead of digits 0 through 4 it has digits of 0, 1, 2 and "-" for -1 and "=" for -2.  Examples of the SNAFU code and equivalent decimal number are shown below.
+
+```
+ SNAFU  Decimal
+1=-0-2     1747
+ 12111      906
+  2=0=      198
+    21       11
+  2=01      201
+   111       31
+ 20012     1257
+   112       32
+ 1=-1=      353
+  1-12      107
+    12        7
+    1=        3
+   122       37
+```
+
+Your goal is to calculate the total amount of fuel required by the hot air balloons and enter that amount in SNAFU code into the fuel heating machine.
+
+## Loading the input file
+
+The `read_lines` function from the `readr` package is used to read the input file.
+```{r}
+#| warning: false
+library(readr)
+library(stringr)
+options(scipen = 999)
+
+filepath <- here::here("./posts/data/aoc/day25_input.txt")
+#filepath <- here::here("./posts/data/aoc/day25_test.txt")
+
+input_codes <- read_lines(filepath, skip_empty_rows = FALSE)
+```
+
+## Calculate Total Fuel Required
+
+The function, ```parse_snafu```, is created to convert the snafu into an integer vector. The "-" and "=" characters are converted to the corresponding -1 and -2 integers.  The total fuel amount is easier to calculate from these integer vectors.
+
+```{r}
+parse_snafu <- function(snafu) {
+  v <- str_split_1(snafu, "")
+  for (i in 1:length(v)) {
+    if (v[i] == "=") {
+      v[i] <- -2
+    } else if (v[i] == "-") {
+      v[i] <- -1
+    } else {
+      next
+    }
+  }
+  return(as.integer(v))
+}
+```
+
+A second function, ```convert_snafu```, is used to convert the parsed snafu, from above, into its equivalent decimal number.
+
+```{r}
+convert_snafu <- function(sv) {
+  tot <- 0
+  for (i in 1:length(sv)) {
+    tot <- tot + (sv[length(sv)-i+1] * 5^(i-1))
+  }
+  return(tot)
+}
+```
+
+The total fuel can then be calculated using these two functions to convert the snafu codes into decimal numbers and then simply add together those numbers.  The ```apply``` functions is base R are used here to apply the functions to the list of codes.
+
+```{r}
+#transform the input strings into integer vectors
+parsed <- lapply(input_codes, parse_snafu)
+#convert to decimal numbers
+converted <- sapply(parsed, convert_snafu)
+#sum the fuel requirements for each balloon
+total <- sum(converted)
+
+total
+```
+There are 109 hot air balloons and their total fuel requirement is 29,541,007,400,367.
+
+## Convert Back to a Snafu Code
+
+The fuel heating machine will only accept the total fuel amount as a snafu code.  Therefore, the long number found above must be converted back which is a bit more challenging problem.  I first thought to code this by finding the highest digit place in this pseudo-base 5 encoding and then find each digit from highest to lowest using a recursive function.  This approach took a while to code by using three functions and obtained the right answer however I learned of a much simpler approach in reviewing other solutions.
+
+A simpler solution is obtained by remembering a trick for base conversion.  The trick is to find the remainder for the starting number divided by the base you are converting to (in this case 5) by applying the modulo operator.  This remainder becomes the lowest place digit for the new base-5 code.  You then precede by taking the quotient from the division and repeating this step until your quotient is 0.  So, the base conversion builds up from the lowest place to the highest place.  Floor division is required as the quotient must be an integer.  This process has been implemented in the function, ```fast_snafu```, shown below.
+
+```{r}
+fast_snafu <- function(tot) {
+  snafu <- character()
+
+  while (tot) {
+    rem <- tot %% 5
+    tot <- floor(tot / 5)
+    if (rem <= 2) {
+      snafu <- c(rem, snafu)
+    } else if (rem == 3) {
+      snafu <- c("=", snafu)
+      #need to increment by 1 since going negative
+      tot <- tot + 1
+    } else {
+      snafu <- c("-", snafu)
+      #need to increment by 1 since going negative
+      tot <- tot + 1
+    }
+  }
+  return(paste(snafu, collapse = ''))
+}
+
+fast_snafu(total)
+```
+
+There is a bit of a complication since we are not using a true base-5 encoding.  For a remainder of 3, we record a -2 and increase the total by 1 (corresponding to a 5).  Similarly, for a remainder of 4, we record a -1 and increase the total by 1.  An elegant solution which finds the correct answer: "2=--=0000-1-0-=1=0=2".
+
+## Longer Solution Using a Recursive Function
+
+Below are the three functions I coded to find the puzzle solution originally.  A function, ```find_place```, to identify the highest place required for the code.  A recursive function, ```create_snafu```, to find each digit from highest-to-lowest taking the ```find_place``` output as a function input along with the number to be converted and a vector for storing the code as integers.  The third function, ```encode_snafu```, simply takes the integer vector and makes a snafu code (with "=" and "-" where appropriate).
+
+```{r}
+find_place <- function(num) {
+  i <- 0
+  val <- 0
+  found <- FALSE
+  while (!found) {
+    i <- i + 1
+    val <- val + (5^(i-1)*2)
+    found <- val >= num
+  }
+  return(i)
+}
+
+create_snafu <- function(p, r, v) {
+  mx <- vector(mode = "integer")
+  for (i in 1:p) {
+    mx <- c(mx, 5^(i-1)*2)
+  }
+  #print(paste("mx:", mx))
+  #if sum of remaining digits is >= abs remainder then set to zero
+  if (sum(mx[1:p-1]) >= abs(r)) {
+    v <- c(v, 0)
+  #if remainder 
+  } else if (mx[p] - abs(r) <= sum(mx[1:p-1])) {
+    v <- c(v, sign(r)*2)
+    r <- r - sign(r) * mx[p]
+  } else {
+    v <- c(v, sign(r)*1)
+    r <- r - sign(r) * (mx[p] / 2)
+  }
+  p <- p - 1
+  if (p > 0) {
+    create_snafu(p, r, v)
+  } else {
+    return(v)
+  }
+}
+
+encode_snafu <- function(v) {
+  encoded <- vector(mode = "character")
+  for (i in 1:length(v)) {
+    if (v[i] == -2) {
+      encoded <- c(encoded, "=")
+    } else if (v[i] == -1) {
+      encoded <- c(encoded, "-")
+    } else {
+      encoded <- c(encoded, v[i])
+    }
+  }
+  return(paste(encoded, collapse = ''))
+}
+```
+
+Then, simply applying these 3 functions to convert the total in decimal form to a snafu code.
+```{r}
+place <- find_place(total)
+snafu <- create_snafu(place, total, vector())
+encode_snafu(snafu)
+```
+So, as you can see, this approach, while certainly far from optimal, also generates the correct snafu code.  It was at least interesting to see my thought process in solving this problem when I didn't recall the base conversion trick.
+
+## Summary
+
+This puzzle was the last for Advent of Code 2022.  I was able to successfully complete all of the puzzles using the R programming language.  I did find that R was quite a bit slower on the more computationally-intensive puzzles typically involving either a breadth-first or depth-first search algorithm but all were achievable.  I also learned a number of approaches to improving the speed of my R code through these puzzles.
+
+:::{.callout-tip collapse="true"}
+## Expand for Session Info
+```{r}
+#| warning: false
+#| echo: false
+library(sessioninfo)
+# save the session info as an object
+pkg_sesh <- session_info(pkgs = "attached")
+
+# get the quarto version
+quarto_version <- system("quarto --version", intern = TRUE)
+
+# inject the quarto info
+pkg_sesh$platform$quarto <- paste(
+  system("quarto --version", intern = TRUE), 
+  "@", 
+  quarto::quarto_path()
+  )
+
+# print it out
+pkg_sesh
+```
+:::
+
+
